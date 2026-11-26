@@ -1,0 +1,15 @@
+{
+  "name": "trading-dashboard",
+  "version": "1.0.0",
+  "description": "Professional Bloomberg-style AI Trading Dashboard & Global Situation Room",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["trading", "stocks", "crypto", "terminal", "bloomberg"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

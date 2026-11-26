@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Monitor & Trading Terminal - Global Situation Room</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Local Lightweight Charts Library (Pre-downloaded for zero-latency, 100% offline reliability) -->
+  <script src="lightweight-charts.standalone.js"></script>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="top-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00F090" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span>WORLD<span class="badge">MONITOR</span></span>
+        <span class="brand-tag">SITUATION ROOM</span>
+      </div>
+
+      <div class="live-pulse" title="Global Satellite & Exchange Feed Active">
+        <div class="radar-scan-box">
+          <div class="pulse-dot"></div>
+          <div class="radar-ring"></div>
+        </div>
+        <span style="letter-spacing: 0.05em; font-weight: 700;">RADAR ACTIVE // LIVE FEED</span>
+      </div>
+    </div>
+
+    <!-- World Clocks with SGT Emphasis -->
+    <div class="market-clocks">
+      <div class="clock-item">
+        <div class="clock-header">
+          <span class="market-status-dot status-open"></span>
+          <span class="status-sgt">SINGAPORE (SGT)</span>
+        </div>
+        <div class="mono" id="clock-sgt" style="font-weight: 700; color: var(--color-cyan);">--:--:--</div>
+      </div>
+      <div class="clock-item">
+        <div class="clock-header">
+          <span class="market-status-dot status-closed"></span>
+          <span>NEW YORK (EST)</span>
+        </div>
+        <div class="mono" id="clock-nyc">--:--:--</div>
+      </div>
+      <div class="clock-item">
+        <div class="clock-header">
+          <span class="market-status-dot status-open"></span>
+          <span>LONDON (GMT)</span>
+        </div>
+        <div class="mono" id="clock-lon">--:--:--</div>
+      </div>
+      <div class="clock-item">
+        <div class="clock-header">
+          <span class="market-status-dot status-open"></span>
+          <span>TOKYO (JST)</span>
+        </div>
+        <div class="mono" id="clock-tyo">--:--:--</div>
+      </div>
+    </div>
+
+    <!-- VIX Volatility & Fear Index Widget -->
+    <div class="vix-header-box" id="btn-open-vix-modal" title="Click to view detailed VIX Volatility Guide & numbers">
+      <div style="display: flex; align-items: baseline; gap: 6px;">
+        <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">VIX FEAR INDEX:</span>
+        <span class="mono" id="vix-header-val" style="font-size: 14px; font-weight: 800;">28.29</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 10px;">
+        <span id="vix-regime-badge" class="ribbon-badge mono bear-bg">ELEVATED FEAR (20-30)</span>
+        <span style="color: var(--color-cyan); font-weight: 600; cursor: pointer;">ℹ Learn VIX</span>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <button class="btn-icon" id="btn-toggle-livestream" title="Global Financial TV & Situation Room Broadcast">
+        <span class="live-tv-dot"></span>
+        <span style="color: #00F090; font-weight: 700;">📺 Live TV</span>
+      </button>
+      <button class="btn-icon active" id="btn-toggle-sound" title="Toggle Sound Chime">🔊 Sound ON</button>
+      <button class="btn-icon" id="btn-open-settings" title="Dashboard Settings">⚙ Settings</button>
+      <button class="btn-icon" id="btn-toggle-fullscreen" title="Toggle Fullscreen">⛶ Fullscreen</button>
+    </div>
+  </header>
+
+  <!-- TICKER RIBBON -->
+  <div class="ticker-ribbon-container">
+    <div class="ticker-ribbon" id="ticker-ribbon">
+      <!-- Injected by app.js -->
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="dashboard-workspace">
+
+    <!-- LEFT PANEL: WATCHLIST & GLOBAL MARKETS -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Global Markets
+        </div>
+        <span class="mono" style="font-size: 10px; color: var(--text-muted);" id="market-total-count">12 ASSETS</span>
+      </div>
+
+      <div class="watchlist-controls">
+        <div class="search-box">
+          <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="watchlist-search-input" placeholder="Search any stock, index, ETF worldwide..." autocomplete="off">
+          <div class="search-results-dropdown" id="global-search-dropdown"></div>
+        </div>
+
+        <div class="market-tabs">
+          <button class="tab-btn active" data-category="All">All</button>
+          <button class="tab-btn" data-category="Indices">Indices</button>
+          <button class="tab-btn" data-category="Crypto">Crypto</button>
+          <button class="tab-btn" data-category="Commodities">Commodities</button>
+          <button class="tab-btn" data-category="Custom">★ Watchlist</button>
+        </div>
+      </div>
+
+      <div class="watchlist-items" id="watchlist-items-list">
+        <!-- Injected by app.js -->
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: INTERACTIVE TRADING CHART -->
+    <section class="chart-workspace">
+      <!-- Headline & Active Symbol Bar -->
+      <div class="chart-header-bar">
+        <div class="symbol-headline">
+          <span class="main-symbol" id="header-active-symbol">^GSPC</span>
+          <span class="main-name" id="header-active-name">S&P 500 Index</span>
+          <span class="market-feed-tag bull-bg" id="header-market-badge">● LIVE FEED</span>
+        </div>
+
+        <div class="main-price-block">
+          <span class="main-price mono" id="header-active-price">--</span>
+          <span class="main-change mono" id="header-active-change">--</span>
+        </div>
+      </div>
+
+      <!-- Quick Stats Strip -->
+      <div class="chart-stats-strip mono">
+        <div class="stat-pill"><span class="stat-label">DAY 1 INCEPTION:</span> <span class="stat-val cyan" id="stat-inception-date">--</span></div>
+        <div class="stat-pill"><span class="stat-label">FIRST OPEN:</span> <span class="stat-val" id="stat-inception-price">--</span></div>
+        <div class="stat-pill"><span class="stat-label">ALL-TIME GAIN:</span> <span class="stat-val bull" id="stat-alltime-gain">--</span></div>
+        <div class="stat-pill"><span class="stat-label">1Y RETURN:</span> <span class="stat-val bull" id="stat-1y-perf">--</span></div>
+        <div class="stat-pill"><span class="stat-label">52W HIGH:</span> <span class="stat-val" id="stat-52w-high">--</span></div>
+        <div class="stat-pill"><span class="stat-label">52W LOW:</span> <span class="stat-val" id="stat-52w-low">--</span></div>
+        <div class="stat-pill"><span class="stat-label">VOL:</span> <span class="stat-val" id="stat-vol">--</span></div>
+        <div class="stat-pill"><span class="stat-label">RSI(14):</span> <span class="stat-val cyan" id="rsi-val-badge">--</span></div>
+        <div class="stat-pill"><span class="stat-label">MACD:</span> <span class="stat-val" id="macd-val-badge">--</span></div>
+      </div>
+
+      <!-- Chart Toolbar -->
+      <div class="chart-controls-bar">
+        <!-- Timeframes & Historical Ranges -->
+        <div class="toolbar-group timeframe-toolbar">
+          <button class="tf-btn active" data-tf="ALL" style="color: #00F090; font-weight: 800;" title="View full history from Day 1 inception without date cutoff">ALL (Day 1 Inception)</button>
+          <button class="tf-btn" data-tf="5Y">5Y</button>
+          <button class="tf-btn" data-tf="1Y" style="color: var(--color-cyan); font-weight: 700;">1Y (Past Year)</button>
+          <button class="tf-btn" data-tf="6M">6M</button>
+          <button class="tf-btn" data-tf="1M">1M</button>
+          <button class="tf-btn" data-tf="1W">1W</button>
+          <button class="tf-btn" data-tf="1D">1D</button>
+          <button class="tf-btn" data-tf="4h">4h</button>
+          <button class="tf-btn" data-tf="1h">1h</button>
+          <button class="tf-btn" data-tf="15m">15m</button>
+          <button class="tf-btn" data-tf="5m">5m</button>
+          <button class="tf-btn" data-tf="1m">1m</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Chart Type -->
+        <div class="toolbar-group chart-type-toolbar">
+          <button class="chart-type-btn active" data-type="candles">Candles</button>
+          <button class="chart-type-btn" data-type="line">Line</button>
+          <button class="chart-type-btn" data-type="area">Area</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Indicator Toggles -->
+        <div class="toolbar-group">
+          <button class="ind-btn active" data-ind="ema20">EMA 20</button>
+          <button class="ind-btn" data-ind="ema50">EMA 50</button>
+          <button class="ind-btn" data-ind="ema200">EMA 200</button>
+          <button class="ind-btn" data-ind="bb">Bollinger</button>
+          <button class="ind-btn active" data-ind="rsi">RSI</button>
+          <button class="ind-btn" data-ind="macd">MACD</button>
+        </div>
+      </div>
+
+      <!-- Main Canvas Container -->
+      <div class="chart-canvas-container">
+        <!-- OHLC Tooltip Legend -->
+        <div class="chart-legend-overlay mono">
+          <div class="legend-ohlc">
+            <span style="color: var(--text-muted);">O:</span> <span id="leg-open">--</span>
+            <span style="color: var(--text-muted);">H:</span> <span id="leg-high">--</span>
+            <span style="color: var(--text-muted);">L:</span> <span id="leg-low">--</span>
+            <span style="color: var(--text-muted);">C:</span> <span id="leg-close">--</span>
+            <span style="color: var(--text-muted);">V:</span> <span id="leg-vol">--</span>
+          </div>
+        </div>
+        <div id="tv-chart"></div>
+      </div>
+
+      <!-- RSI Sub-pane -->
+      <div class="subpane-container" id="rsi-pane">
+        <div class="subpane-header">
+          <span>RELATIVE STRENGTH INDEX (RSI 14)</span>
+          <span style="font-size: 9px; color: var(--text-muted);">OB: 70 | OS: 30</span>
+        </div>
+        <canvas class="subpane-canvas" id="rsi-canvas"></canvas>
+      </div>
+
+      <!-- MACD Sub-pane -->
+      <div class="subpane-container" id="macd-pane" style="display: none;">
+        <div class="subpane-header">
+          <span>MOVING AVERAGE CONVERGENCE DIVERGENCE (MACD 12, 26, 9)</span>
+          <span style="font-size: 9px; color: var(--text-muted);">Cyan: MACD | Yellow: Signal</span>
+        </div>
+        <canvas class="subpane-canvas" id="macd-canvas"></canvas>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: MULTI-INTELLIGENCE HUB -->
+    <section class="panel panel-right intelligence-hub">
+      <!-- Hub Navigation Tabs -->
+      <div class="hub-navigation-tabs">
+        <button class="hub-tab active" data-view="view-ai-analyst">
+          <span>⚡ AI Analyst</span>
+        </button>
+        <button class="hub-tab" data-view="view-portfolio">
+          <span>💼 Portfolio</span>
+        </button>
+        <button class="hub-tab" data-view="view-scanner">
+          <span>🎯 Scanner</span>
+        </button>
+        <button class="hub-tab" data-view="view-news">
+          <span>📰 News</span>
+        </button>
+        <button class="hub-tab" data-view="view-livestream">
+          <span style="color: #00F090;">📺 Live TV</span>
+        </button>
+        <button class="hub-tab" data-view="view-calendar">
+          <span>📅 SGT Cal</span>
+        </button>
+        <button class="hub-tab" data-view="view-alerts">
+          <span>🔔 Alerts</span>
+        </button>
+      </div>
+
+      <div class="hub-content-area">
+
+        <!-- TAB 1: AI MARKET ANALYST -->
+        <div class="hub-view-panel" id="view-ai-analyst" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+          <!-- Header Banner -->
+          <div class="ai-badge-header">
+            <div class="ai-badge-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2.5">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              </svg>
+              <span>AI Market Synthesis</span>
+            </div>
+            <span class="ai-chip">REAL-TIME ENGINE</span>
+          </div>
+
+          <!-- Market Sentiment / Fear & Greed Meter -->
+          <div class="sentiment-card">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Market Sentiment Score</span>
+              <span class="mono" style="font-size: 18px; font-weight: 800; color: var(--text-bright);" id="ai-sentiment-score">58</span>
+            </div>
+            <div class="sentiment-meter-bar">
+              <div class="sentiment-pointer" id="ai-sentiment-pointer" style="left: 58%;"></div>
+            </div>
+            <div class="sentiment-labels">
+              <span>EXTREME FEAR</span>
+              <span id="ai-sentiment-label" class="bull">BULLISH OPTIMISM</span>
+              <span>EXTREME GREED</span>
+            </div>
+          </div>
+
+          <!-- Technical Regime Classification -->
+          <div class="ai-regime-box" id="ai-regime-box">
+            <div class="ai-regime-title" id="ai-regime-title">BULLISH EXPANSION</div>
+            <div class="ai-regime-desc" id="ai-regime-desc">
+              Strong structural bid absorption with institutional capital favoring upside continuation above key moving averages.
+            </div>
+          </div>
+
+          <!-- Key Support & Resistance Levels -->
+          <div class="key-levels-grid mono">
+            <div class="level-card">
+              <div class="level-label">RESISTANCE 2 (FIB 1.618)</div>
+              <div class="level-val bear" id="lvl-r2">--</div>
+            </div>
+            <div class="level-card">
+              <div class="level-label">RESISTANCE 1 (BREAKOUT)</div>
+              <div class="level-val bear" id="lvl-r1">--</div>
+            </div>
+            <div class="level-card">
+              <div class="level-label">SUPPORT 1 (FIB 0.618)</div>
+              <div class="level-val bull" id="lvl-s1">--</div>
+            </div>
+            <div class="level-card">
+              <div class="level-label">SUPPORT 2 (KEY FLOOR)</div>
+              <div class="level-val bull" id="lvl-s2">--</div>
+            </div>
+          </div>
+
+          <!-- Plain-Language Explanations -->
+          <div class="ai-analysis-block">
+            <div class="ai-block-heading">
+              <span>● What Happened</span>
+            </div>
+            <div class="ai-block-text" id="ai-what-happened">
+              Analyzing current order-flow dynamics and price displacement...
+            </div>
+          </div>
+
+          <div class="ai-analysis-block">
+            <div class="ai-block-heading">
+              <span>● Why It Moved</span>
+            </div>
+            <div class="ai-block-text" id="ai-why-moved">
+              Cross-asset macroeconomic factors and technical breakout momentum triggering algorithmic execution.
+            </div>
+          </div>
+
+          <div class="ai-analysis-block">
+            <div class="ai-block-heading">
+              <span>● Key Levels To Watch</span>
+            </div>
+            <div class="ai-block-text" id="ai-what-to-watch">
+              Monitor immediate breakout resistance and baseline invalidation stop points.
+            </div>
+          </div>
+
+          <!-- Interactive Ask AI Box -->
+          <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+              Ask AI Financial Analyst
+            </div>
+
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              <span class="ai-quick-chip tab-btn" data-prompt="What is the short-term trend?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Trend Analysis</span>
+              <span class="ai-quick-chip tab-btn" data-prompt="Where are the best support entry levels?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Key Levels</span>
+              <span class="ai-quick-chip tab-btn" data-prompt="How do Fed rate expectations affect this asset?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Macro Impact</span>
+            </div>
+
+            <div class="ai-ask-container">
+              <input type="text" class="ai-ask-input" id="ai-ask-input" placeholder="Ask about trends, support/resistance, setups...">
+              <button class="ai-ask-btn" id="ai-ask-submit">Ask</button>
+            </div>
+
+            <div id="ai-chat-output" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; margin-top: 6px;"></div>
+          </div>
+        </div>
+
+        <!-- TAB: PORTFOLIO HOLDINGS (IBKR & TIGER) -->
+        <div class="hub-view-panel" id="view-portfolio" style="display: none; flex-direction: column; gap: 12px; width: 100%;">
+          <!-- Portfolio Metrics Summary -->
+          <div class="portfolio-metric-card">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Net Liquidation Value</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span class="badge-ibkr" id="port-ibkr-count">0 IBKR</span>
+                <span class="badge-tiger" id="port-tiger-count">0 Tiger</span>
+              </div>
+            </div>
+            <div class="mono" style="font-size: 22px; font-weight: 800; color: var(--text-bright); margin-top: 2px;" id="port-total-value">$0.00</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; margin-top: 4px;">
+              <span style="color: var(--text-muted);">Unrealized P&L:</span>
+              <span class="mono" id="port-total-pnl" style="font-weight: 700;">$0.00</span>
+              <span id="port-total-pnl-pct" class="mono ribbon-badge bull-bg">0.00%</span>
+            </div>
+          </div>
+
+          <!-- Portfolio View Mode Switcher -->
+          <div class="portfolio-view-switcher" style="display: flex; gap: 6px; margin-bottom: 2px;">
+            <button class="tab-btn port-subtab-btn active" id="btn-port-tab-holdings" data-subview="holdings" style="flex: 1; text-align: center; font-weight: 700;">
+              📋 Holdings Matrix (16)
+            </button>
+            <button class="tab-btn port-subtab-btn" id="btn-port-tab-recs" data-subview="recommendations" style="flex: 1; text-align: center; font-weight: 700; color: var(--color-cyan);">
+              🎯 Daily Macro Directives
+            </button>
+          </div>
+
+          <!-- SUBVIEW 1: HOLDINGS MATRIX -->
+          <div id="portfolio-holdings-subview" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Actions Toolbar -->
+            <div style="display: flex; gap: 6px; justify-content: space-between;">
+              <button class="form-btn" id="btn-open-add-holding" style="flex: 1; padding: 6px; font-size: 11px;">+ Add Position</button>
+              <button class="btn-icon" id="btn-import-csv" style="padding: 6px 10px; font-size: 11px;" title="Import CSV statement">📥 Import CSV</button>
+              <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+              <button class="btn-icon" id="btn-clear-holdings" style="padding: 6px 10px; font-size: 11px; color: var(--color-bear);" title="Reset portfolio">🗑 Clear</button>
+            </div>
+
+            <!-- Holdings Position List -->
+            <div style="display: flex; flex-direction: column; gap: 8px;" id="portfolio-holdings-list">
+              <!-- Injected by portfolio.js -->
+            </div>
+
+            <!-- Holdings-Specific News Impact Section -->
+            <div style="margin-top: 10px;">
+              <div style="font-size: 11px; font-weight: 700; color: var(--color-cyan); text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <span>📡 Headlines Affecting Your Holdings</span>
+              </div>
+              <div id="portfolio-news-container" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Injected by portfolio.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBVIEW 2: DAILY MACRO RECOMMENDATIONS & ACTION MATRIX -->
+          <div id="portfolio-recs-subview" style="display: none; flex-direction: column; gap: 10px;">
+            <!-- Injected by portfolio.js -->
+          </div>
+        </div>
+
+        <!-- TAB 2: MARKET SCANNER -->
+        <div class="hub-view-panel" id="view-scanner" style="display: none; flex-direction: column; gap: 10px; width: 100%;">
+          <div class="scanner-filter-bar">
+            <button class="scanner-filter-btn active" data-filter="all">All Opportunities</button>
+            <button class="scanner-filter-btn" data-filter="breakouts">Breakouts</button>
+            <button class="scanner-filter-btn" data-filter="breakdowns">Breakdowns</button>
+            <button class="scanner-filter-btn" data-filter="volume">Unusual Vol</button>
+            <button class="scanner-filter-btn" data-filter="momentum">Momentum</button>
+          </div>
+
+          <div id="scanner-results-container" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Injected by scanner.js -->
+          </div>
+        </div>
+
+        <!-- TAB 3: LIVE FINANCIAL & GLOBAL NEWS HUB -->
+        <div class="hub-view-panel" id="view-news" style="display: none; flex-direction: column; gap: 10px; width: 100%;">
+          <!-- Multi-Category Live Tabs -->
+          <div class="news-category-bar" style="display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;">
+            <button class="tab-btn news-filter-btn active" data-category="All">⚡ All Breaking</button>
+            <button class="tab-btn news-filter-btn" data-category="Geopolitics">🌐 Global & Geopolitics</button>
+            <button class="tab-btn news-filter-btn" data-category="CentralBanks">🏛 Fed & Rates</button>
+            <button class="tab-btn news-filter-btn" data-category="Equities">📈 Equities & Tech</button>
+            <button class="tab-btn news-filter-btn" data-category="Commodities">🛢 Commodities</button>
+            <button class="tab-btn news-filter-btn" data-category="Crypto">🪙 Crypto</button>
+          </div>
+
+          <!-- Live News Search & Refresh Toolbar -->
+          <div class="news-toolbar" style="display: flex; gap: 6px; align-items: center;">
+            <input type="text" id="news-search-input" class="form-input" style="flex: 1; padding: 5px 8px; font-size: 11px;" placeholder="🔍 Filter headlines (e.g. Fed, tariffs, oil, DBS, Apple)..." />
+            <button class="btn-icon" id="btn-refresh-news" style="padding: 5px 8px; font-size: 11px;" title="Reload 60+ Live Feeds">⟳ Refresh</button>
+          </div>
+
+          <!-- Quick Embedded TV Stream Toggle for News Readers -->
+          <div class="news-livestream-banner-bar" style="display: flex; justify-content: space-between; align-items: center; background: rgba(0, 240, 144, 0.06); border: 1px solid rgba(0, 240, 144, 0.2); padding: 5px 10px; border-radius: 4px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="live-tv-pulse-dot"></span>
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-bright);">LIVE SITUATION ROOM TV FEED</span>
+            </div>
+            <button class="btn-icon" id="btn-news-tv-toggle" style="padding: 2px 8px; font-size: 10px; color: var(--color-cyan); font-weight: 700;">▼ Watch Live TV</button>
+          </div>
+          <div id="news-tv-embedded-container" style="display: none; margin-bottom: 4px;"></div>
+
+          <div id="news-feed-container" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Injected by news.js -->
+          </div>
+        </div>
+
+        <!-- TAB: LIVE GLOBAL FINANCIAL TELEVISION & SITUATION ROOM CONTROL ROOM -->
+        <div class="hub-view-panel" id="view-livestream" style="display: none; flex-direction: column; gap: 10px; width: 100%;">
+          <!-- Control Room Header -->
+          <div class="livestream-header-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="live-tv-pulse-dot"></span>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: var(--text-bright); letter-spacing: 0.04em;">WORLD MONITOR TV</div>
+                  <div style="font-size: 9px; color: var(--color-bull); font-weight: 700;">● 24/7 SATELLITE BROADCAST CONTROL ROOM</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <button class="livestream-mode-btn active" id="btn-stream-single" title="Single Focused Channel">Single</button>
+                <button class="livestream-mode-btn" id="btn-stream-dual" title="Dual-View Control Room">Dual</button>
+                <button class="livestream-mode-btn" id="btn-stream-pip" title="Pop out into floating Picture-in-Picture window">📌 PiP</button>
+                <button class="livestream-mode-btn popout-btn" id="btn-stream-popout" title="Open unblocked external viewer (Zero login required)">↗ Popout</button>
+                <button class="livestream-mode-btn" id="btn-stream-portal" title="Open Official Web Broadcast Portal">🌐 Web</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Channel Switcher Ribbon (All 100% Viewable in Singapore with Zero Login) -->
+          <div class="channel-pill-bar">
+            <button class="channel-pill active" data-channel="cna">🇸🇬 CNA Singapore</button>
+            <button class="channel-pill" data-channel="bloomberg">📈 Bloomberg TV</button>
+            <button class="channel-pill" data-channel="skynews">🇬🇧 Sky News</button>
+            <button class="channel-pill" data-channel="france24">🇫🇷 France 24</button>
+            <button class="channel-pill" data-channel="dwnews">🇩🇪 DW News</button>
+            <button class="channel-pill" data-channel="aljazeera">🇶🇦 Al Jazeera</button>
+            <button class="channel-pill" data-channel="euronews">🇪🇺 Euronews</button>
+          </div>
+
+          <!-- Video Player Stage (Single or Dual Control Room) -->
+          <div class="livestream-player-stage" id="livestream-player-stage">
+            <div class="player-wrapper" id="player-wrapper-1">
+              <iframe id="stream-iframe-1" class="livestream-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+              <div class="stream-overlay-badge">
+                <span class="live-tv-pulse-dot"></span>
+                <span id="stream-title-1">BLOOMBERG TELEVISION</span>
+              </div>
+            </div>
+            <div class="player-wrapper" id="player-wrapper-2" style="display: none;">
+              <iframe id="stream-iframe-2" class="livestream-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+              <div class="stream-overlay-badge">
+                <span class="live-tv-pulse-dot"></span>
+                <span id="stream-title-2">SKY NEWS GLOBAL WIRE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Channel Telemetry & Intel Card -->
+          <div class="stream-intel-card" id="stream-intel-card">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <span class="cyan" style="font-weight: 700; font-size: 11px;" id="intel-channel-name">Bloomberg Television (USA / GLOBAL FINANCE)</span>
+              <span class="mono" style="font-size: 10px; color: var(--color-bull); font-weight: 700;">● 1080p HD FEED</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.45;" id="intel-channel-desc">
+              24/7 institutional market news covering Wall Street equities, US Treasury yields, central bank announcements, and macroeconomic forecasts.
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: ECONOMIC CALENDAR (SGT) -->
+        <div class="hub-view-panel" id="view-calendar" style="display: none; flex-direction: column; gap: 10px; width: 100%;">
+          <div class="calendar-time-header">
+            <span>TIMEZONE: SINGAPORE (SGT, UTC+8)</span>
+            <span class="mono" id="cal-countdown-text">CALCULATING...</span>
+          </div>
+
+          <div style="display: flex; gap: 4px;">
+            <button class="tab-btn cal-filter-btn active" data-impact="all">All Events</button>
+            <button class="tab-btn cal-filter-btn" data-impact="high">High Impact Only</button>
+          </div>
+
+          <div id="calendar-events-container" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Injected by calendar.js -->
+          </div>
+        </div>
+
+        <!-- TAB 5: WATCHLIST & ALERTS -->
+        <div class="hub-view-panel" id="view-alerts" style="display: none; flex-direction: column; gap: 12px; width: 100%;">
+          <!-- Create Alert Card -->
+          <div class="alert-form-card">
+            <div style="font-size: 11px; font-weight: 700; color: var(--color-cyan); text-transform: uppercase;">
+              Create Price & Technical Alert
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">Select Asset</label>
+              <select class="form-select" id="alert-symbol-select">
+                <option value="^GSPC">S&P 500 (^GSPC)</option>
+                <option value="^IXIC">NASDAQ (^IXIC)</option>
+                <option value="^DJI">Dow Jones (^DJI)</option>
+                <option value="^STI">Straits Times Index (^STI)</option>
+                <option value="BTC-USD">Bitcoin (BTC-USD)</option>
+                <option value="ETH-USD">Ethereum (ETH-USD)</option>
+                <option value="GC=F">Gold Futures (GC=F)</option>
+                <option value="CL=F">Crude Oil (CL=F)</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">Condition Trigger</label>
+              <select class="form-select" id="alert-condition-select">
+                <option value="price_above">Price Crosses Above</option>
+                <option value="price_below">Price Crosses Below</option>
+                <option value="pct_above">24h Movement % Exceeds</option>
+                <option value="breakout">Session High Breakout</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label class="form-label">Target Value</label>
+              <input type="number" step="any" class="form-input" id="alert-value-input" placeholder="e.g. 61000">
+            </div>
+
+            <button class="form-btn" id="btn-create-alert">+ Set Active Alert</button>
+          </div>
+
+          <!-- Active Alerts List -->
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-top: 6px;">
+            Active Alerts Monitoring
+          </div>
+
+          <div id="active-alerts-list" style="display: flex; flex-direction: column; gap: 6px;">
+            <!-- Injected by app.js -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FLOATING TOAST NOTIFICATION STACK -->
+  <div id="toast-container"></div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">AlphaTerminal Pro Settings</h3>
+        <button class="close-modal" id="close-settings">&times;</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-row">
+          <label class="form-label">Google Gemini API Key (Optional for Custom AI Queries)</label>
+          <input type="password" class="form-input" id="input-gemini-key" placeholder="AIzaSy...">
+          <span style="font-size: 10px; color: var(--text-muted);">
+            If left blank, the dashboard uses its built-in quantitative analytical engine which works instantly with zero setup.
+          </span>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Data Polling Interval</label>
+          <select class="form-select" id="select-refresh-rate">
+            <option value="5000">5 seconds (High Frequency)</option>
+            <option value="8000" selected>8 seconds (Recommended)</option>
+            <option value="15000">15 seconds (Battery Saver)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Audio Sound Alerts</label>
+          <span style="font-size: 11px; color: var(--text-secondary);">
+            Synthesizes professional acoustic chime for breakout and price alerts via Web Audio API.
+          </span>
+        </div>
+
+        <button class="form-btn" id="btn-save-settings" style="margin-top: 8px;">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD HOLDING MODAL -->
+  <div class="modal-overlay" id="holding-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Holding (IBKR / Tiger Brokers)</h3>
+        <button class="close-modal" id="close-holding-modal">&times;</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="form-row">
+          <label class="form-label">Broker Account</label>
+          <select class="form-select" id="select-hold-broker">
+            <option value="IBKR">Interactive Brokers (IBKR)</option>
+            <option value="Tiger">Tiger Brokers (TigerTrade)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Asset Ticker Symbol</label>
+          <input type="text" class="form-input" id="input-hold-symbol" placeholder="e.g. NVDA, TSLA, D05.SI, 9988.HK">
+          <span style="font-size: 10px; color: var(--text-muted);">
+            US Stocks: NVDA, AAPL • SG Stocks: D05.SI, Z74.SI • HK Stocks: 9988.HK, 0700.HK
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-row">
+            <label class="form-label">Quantity / Shares</label>
+            <input type="number" step="any" class="form-input" id="input-hold-shares" placeholder="e.g. 50">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Average Purchase Cost</label>
+            <input type="number" step="any" class="form-input" id="input-hold-cost" placeholder="e.g. 118.50">
+          </div>
+        </div>
+
+        <button class="form-btn" id="btn-save-holding" style="margin-top: 6px;">+ Save Position</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIX GUIDE & REGIME MODAL -->
+  <div class="modal-overlay" id="vix-modal">
+    <div class="modal-window" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title">CBOE Volatility Index (VIX) — Market Fear Gauge</h3>
+        <button class="close-modal" id="close-vix-modal">&times;</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: var(--bg-card); border-left: 3px solid var(--color-cyan); padding: 10px 12px; border-radius: 0 4px 4px 0; font-size: 12px; line-height: 1.5;">
+          <strong>What VIX Represents:</strong> The VIX measures the stock market's expectation of 30-day forward volatility calculated from S&P 500 index options pricing. It reflects the price institutional investors are paying for portfolio insurance.
+        </div>
+
+        <!-- Live Metrics Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;" class="mono">
+          <div style="background: var(--bg-input); padding: 8px 10px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 9px; color: var(--text-muted);">EXPECTED DAILY S&P SWING (RULE OF 16)</div>
+            <div style="font-size: 16px; font-weight: 800; color: var(--color-cyan);" id="vix-daily-move">±1.77%</div>
+            <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">VIX divided by 16 (√252 trading days)</div>
+          </div>
+          <div style="background: var(--bg-input); padding: 8px 10px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 9px; color: var(--text-muted);">EXPECTED 30-DAY IMPLIED S&P RANGE</div>
+            <div style="font-size: 16px; font-weight: 800; color: var(--color-amber);" id="vix-monthly-move">±8.17%</div>
+            <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">VIX divided by √12 months</div>
+          </div>
+        </div>
+
+        <!-- 4 Volatility Regimes Table -->
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+          VIX Numerical Regimes & Trading Interpretation
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 11px;">
+          <div style="background: rgba(0, 240, 144, 0.08); border-left: 3px solid var(--color-bull); padding: 6px 10px; border-radius: 0 4px 4px 0;">
+            <div style="display: flex; justify-content: space-between;">
+              <strong class="bull">VIX &lt; 15 : COMPLACENCY & CALM</strong>
+              <span class="mono" style="color: var(--text-muted);">Expected Daily Move: &lt; ±0.9%</span>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 10px; margin-top: 2px;">
+              Bull market regime. Hedging demand is low, option insurance is cheap. Ideal environment for trend-following equities and buying portfolio put hedges cheaply.
+            </div>
+          </div>
+
+          <div style="background: rgba(0, 210, 255, 0.08); border-left: 3px solid var(--color-cyan); padding: 6px 10px; border-radius: 0 4px 4px 0;">
+            <div style="display: flex; justify-content: space-between;">
+              <strong class="cyan">VIX 15 – 20 : NORMAL BASELINE</strong>
+              <span class="mono" style="color: var(--text-muted);">Expected Daily Move: ±0.9% to ±1.25%</span>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 10px; margin-top: 2px;">
+              Historical long-term median. Balanced risk environment with normal market pullbacks and orderly orderly corrections.
+            </div>
+          </div>
+
+          <div style="background: rgba(255, 184, 0, 0.08); border-left: 3px solid var(--color-amber); padding: 6px 10px; border-radius: 0 4px 4px 0;">
+            <div style="display: flex; justify-content: space-between;">
+              <strong class="amber">VIX 20 – 30 : ELEVATED ANXIETY & CHOP</strong>
+              <span class="mono" style="color: var(--text-muted);">Expected Daily Move: ±1.25% to ±1.9%</span>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 10px; margin-top: 2px;">
+              Heightened institutional caution. Rapid intraday swings, wider bid-ask spreads, and options premiums rise. Tighten trailing stops and avoid excessive leverage.
+            </div>
+          </div>
+
+          <div style="background: rgba(255, 56, 92, 0.08); border-left: 3px solid var(--color-bear); padding: 6px 10px; border-radius: 0 4px 4px 0;">
+            <div style="display: flex; justify-content: space-between;">
+              <strong class="bear">VIX &gt; 30 : EXTREME PANIC & CRISIS</strong>
+              <span class="mono" style="color: var(--text-muted);">Expected Daily Move: &gt; ±2.0%</span>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 10px; margin-top: 2px;">
+              Capitulation phase. High systemic stress, margin liquidations. Historically, extreme VIX spikes above 35-40 mark premier long-term generational buying opportunities for patient capital.
+            </div>
+          </div>
+        </div>
+
+        <button class="form-btn" id="btn-close-vix-guide" style="margin-top: 4px;">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING PICTURE-IN-PICTURE (PiP) SITUATION ROOM PLAYER -->
+  <div class="floating-pip-container" id="floating-pip-container" style="display: none;">
+    <div class="floating-pip-header">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="live-tv-pulse-dot"></span>
+        <span id="pip-channel-label" style="font-size: 11px; font-weight: 800; color: #FFF;">Bloomberg TV</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <button class="pip-ctrl-btn" id="btn-pip-dock" title="Dock back into Dashboard">⛶</button>
+        <button class="pip-ctrl-btn" id="btn-pip-close" title="Close Floating PiP">✕</button>
+      </div>
+    </div>
+    <div class="floating-pip-body" id="floating-pip-body">
+      <!-- Injected by livestream.js -->
+    </div>
+  </div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script src="chart.js"></script>
+  <script src="scanner.js"></script>
+  <script src="ai-analyst.js"></script>
+  <script src="portfolio.js"></script>
+  <script src="news.js"></script>
+  <script src="calendar.js"></script>
+  <script src="livestream.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
