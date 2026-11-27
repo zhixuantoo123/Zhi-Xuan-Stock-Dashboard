@@ -421,6 +421,9 @@ class TradingApp {
         const bars = this.parseYahooBars(json);
         if (bars && bars.length > 0) {
           this.chartManager.loadData(bars, symbol);
+          if (this.portfolio && this.chartManager) {
+            this.chartManager.updatePortfolioOverlay(symbol, this.portfolio);
+          }
           if (this.aiAnalyst && this.selectedItem) {
             this.aiAnalyst.analyze(this.selectedItem, this.chartManager);
           }
@@ -447,6 +450,9 @@ class TradingApp {
           volume: parseFloat(k[5])
         }));
         this.chartManager.loadData(bars, symbol);
+        if (this.portfolio && this.chartManager) {
+          this.chartManager.updatePortfolioOverlay(symbol, this.portfolio);
+        }
         if (this.aiAnalyst && this.selectedItem) {
           this.aiAnalyst.analyze(this.selectedItem, this.chartManager);
         }
@@ -631,6 +637,9 @@ class TradingApp {
     }
 
     this.chartManager.loadData(bars, symbol);
+    if (this.portfolio && this.chartManager) {
+      this.chartManager.updatePortfolioOverlay(symbol, this.portfolio);
+    }
     if (this.aiAnalyst && this.selectedItem) {
       this.aiAnalyst.analyze(this.selectedItem, this.chartManager);
     }
@@ -684,6 +693,9 @@ class TradingApp {
     // Sync active highlight in Portfolio tab
     if (this.portfolio && typeof this.portfolio.highlightActiveHolding === "function") {
       this.portfolio.highlightActiveHolding(symbol);
+    }
+    if (this.portfolio && this.chartManager) {
+      this.chartManager.updatePortfolioOverlay(symbol, this.portfolio);
     }
   }
 

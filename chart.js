@@ -14,6 +14,7 @@ class TradingChartManager {
     this.bbUpperSeries = null;
     this.bbLowerSeries = null;
     this.bbMiddleSeries = null;
+    this.avgCostPriceLine = null;
 
     this.currentData = []; // Raw OHLCV bars
     this.currentSymbol = "^GSPC";
@@ -268,6 +269,85 @@ class TradingChartManager {
     }
     if (l52El && l52 !== Infinity) {
       l52El.textContent = '$' + l52.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+  }
+
+  // Institutional Average Purchase Price Overlay & P&L Telemetry
+  updatePortfolioOverlay(symbol, portfolioManager) {
+    // 1. Cleanly remove previous price line
+    if (this.avgCostPriceLine) {
+      if (this.candleSeries) {
+        try { this.candleSeries.removePriceLine(this.avgCostPriceLine); } catch (e) {}
+      }
+      if (this.lineSeries) {
+        try { this.lineSeries.removePriceLine(this.avgCostPriceLine); } catch (e) {}
+      }
+      this.avgCostPriceLine = null;
+    }
+
+    const posStrip = document.getElementById("chart-position-strip");
+    if (!portfolioManager || !portfolioManager.holdings) {
+      if (posStrip) posStrip.style.display = "none";
+      return;
+    }
+
+    // Match holding (supports VWRA / VWRA.L, HK tickers)
+    const holding = portfolioManager.holdings.find(h => {
+      if (h.symbol === symbol || h.id === symbol) return true;
+      if (symbol === "VWRA.L" && h.symbol === "VWRA") return true;
+      if (symbol === "VWRA" && h.symbol === "VWRA.L") return true;
+      return false;
+    });
+
+    if (!holding) {
+      if (posStrip) posStrip.style.display = "none";
+      return;
+    }
+
+    const curPrice = holding.currentPrice || (this.currentData.length > 0 ? this.currentData[this.currentData.length - 1].close : holding.avgCost);
+    const pnlPerShare = curPrice - holding.avgCost;
+    const pnlPct = holding.avgCost > 0 ? (pnlPerShare / holding.avgCost) * 100 : 0;
+    const totalPnl = pnlPerShare * holding.shares;
+    const sign = pnlPerShare >= 0 ? '+' : '';
+    const isBull = pnlPerShare >= 0;
+    const currSym = holding.currency === "SGD" ? "S$" : (holding.currency === "HKD" ? "HK$" : "$");
+
+    // 2. Draw Institutional Horizontal Average Cost Price Line on Active Series
+    const targetSeries = this.candleSeries || this.lineSeries || this.areaSeries;
+    if (targetSeries && typeof targetSeries.createPriceLine === 'function') {
+      try {
+        this.avgCostPriceLine = targetSeries.createPriceLine({
+          price: holding.avgCost,
+          color: isBull ? '#00F090' : '#FF385C',
+          lineWidth: 2,
+          lineStyle: 2, // Dashed line
+          axisLabelVisible: true,
+          title: `YOUR AVG COST: ${currSym}${holding.avgCost.toFixed(2)} (${sign}${pnlPct.toFixed(2)}%)`
+        });
+      } catch (e) {
+        console.warn("Could not draw average cost price line:", e);
+      }
+    }
+
+    // 3. Display Institutional Portfolio Position Live Ribbon
+    if (posStrip) {
+      posStrip.style.display = "flex";
+      posStrip.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="pos-strip-badge ${holding.broker === 'IBKR' ? 'badge-ibkr' : 'badge-tiger'}">${holding.broker}</span>
+          <span style="font-weight: 800; color: #FFF;">YOUR HOLDING:</span>
+          <span><strong>${holding.shares.toLocaleString()}</strong> Shares</span>
+        </div>
+        <div class="pos-strip-detail">
+          <span>AVG COST: <strong class="cyan">${currSym}${holding.avgCost.toFixed(2)}</strong></span>
+          <span class="sep">•</span>
+          <span>CURRENT DAY: <strong>${currSym}${curPrice.toFixed(2)}</strong></span>
+          <span class="sep">•</span>
+          <span>PER-SHARE SPREAD: <strong class="${isBull ? 'bull' : 'bear'}">${sign}${currSym}${pnlPerShare.toFixed(2)} (${sign}${pnlPct.toFixed(2)}%)</strong></span>
+          <span class="sep">•</span>
+          <span>NET P&L: <strong class="${isBull ? 'bull' : 'bear'}">${sign}${currSym}${totalPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+        </div>
+      `;
     }
   }
 

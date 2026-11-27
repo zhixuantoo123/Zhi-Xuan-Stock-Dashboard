@@ -267,6 +267,43 @@ class PortfolioManager {
     const importBtn = document.getElementById("btn-import-csv");
     const fileInput = document.getElementById("csv-file-input");
 
+    // Portfolio View-Only Security Lock Controller
+    const authBtn = document.getElementById("btn-manager-auth");
+    const lockBtn = document.getElementById("btn-lock-portfolio");
+    const editToolbar = document.getElementById("manager-edit-toolbar");
+    
+    // Check if session previously unlocked
+    if (sessionStorage.getItem("portfolio_manager_unlocked") === "true") {
+      this.isManagerUnlocked = true;
+      if (editToolbar) editToolbar.style.display = "block";
+      if (authBtn) {
+        authBtn.innerHTML = "🔓 Manager Mode";
+        authBtn.classList.add("unlocked");
+      }
+    } else {
+      this.isManagerUnlocked = false;
+      if (editToolbar) editToolbar.style.display = "none";
+    }
+
+    if (authBtn) {
+      authBtn.addEventListener("click", () => {
+        if (this.isManagerUnlocked) {
+          this.lockPortfolio();
+        } else {
+          const pin = prompt("Enter Portfolio Manager Access PIN (Owner Only):");
+          if (pin === "2026" || pin === "zhixuan") {
+            this.unlockPortfolio();
+          } else if (pin !== null) {
+            alert("Incorrect access credentials. Portfolio remains strictly in View-Only mode.");
+          }
+        }
+      });
+    }
+
+    if (lockBtn) {
+      lockBtn.addEventListener("click", () => this.lockPortfolio());
+    }
+
     // Portfolio Subview Switcher (Holdings Matrix vs Daily Macro Directives)
     const btnHoldings = document.getElementById("btn-port-tab-holdings");
     const btnRecs = document.getElementById("btn-port-tab-recs");
@@ -315,6 +352,32 @@ class PortfolioManager {
       importBtn.addEventListener("click", () => fileInput.click());
       fileInput.addEventListener("change", (e) => this.handleCSVUpload(e));
     }
+  }
+
+  unlockPortfolio() {
+    this.isManagerUnlocked = true;
+    sessionStorage.setItem("portfolio_manager_unlocked", "true");
+    const editToolbar = document.getElementById("manager-edit-toolbar");
+    const authBtn = document.getElementById("btn-manager-auth");
+    if (editToolbar) editToolbar.style.display = "block";
+    if (authBtn) {
+      authBtn.innerHTML = "🔓 Manager Mode";
+      authBtn.classList.add("unlocked");
+    }
+    if (this.app) this.app.showToast("🔓 Manager mode unlocked: Position editing enabled", "cyan");
+  }
+
+  lockPortfolio() {
+    this.isManagerUnlocked = false;
+    sessionStorage.removeItem("portfolio_manager_unlocked");
+    const editToolbar = document.getElementById("manager-edit-toolbar");
+    const authBtn = document.getElementById("btn-manager-auth");
+    if (editToolbar) editToolbar.style.display = "none";
+    if (authBtn) {
+      authBtn.innerHTML = "🔑 Manager Login";
+      authBtn.classList.remove("unlocked");
+    }
+    if (this.app) this.app.showToast("🔒 Portfolio locked to View-Only mode", "bull");
   }
 
   // Convert any price/value into USD equivalent
@@ -463,16 +526,26 @@ class PortfolioManager {
     if (!this.holdings || this.holdings.length === 0) return;
 
     this.holdings.forEach(pos => {
-      // Direct symbol match
-      const item = marketItems.find(x => x.symbol === pos.symbol || x.id === pos.symbol);
+      // Direct symbol match or mapped tickers (e.g. VWRA vs VWRA.L, HK stocks)
+      const item = marketItems.find(x => {
+        if (x.symbol === pos.symbol || x.id === pos.symbol) return true;
+        if (pos.symbol === "VWRA" && (x.symbol === "VWRA.L" || x.id === "VWRA.L")) return true;
+        if (pos.symbol.includes(".HK") && x.symbol && x.symbol.includes(pos.symbol.replace(/^0+/, ''))) return true;
+        return false;
+      });
       if (item && item.price) {
         pos.currentPrice = item.price;
-        pos.change = item.change;
-        pos.pctChange = item.pctChange;
+        pos.change = item.change || 0;
+        pos.pctChange = item.pctChange || 0;
       }
     });
 
     this.render();
+
+    // Live update interactive chart overlay if currently charted
+    if (this.app && this.app.chartManager && typeof this.app.chartManager.updatePortfolioOverlay === "function") {
+      this.app.chartManager.updatePortfolioOverlay(this.app.selectedSymbol, this);
+    }
   }
 
   // Holdings-Specific News Matcher
@@ -592,10 +665,27 @@ class PortfolioManager {
     // Render each individual holding
     this.holdings.forEach(pos => {
       const curPrice = pos.currentPrice || pos.avgCost;
+      const pnlPerShare = curPrice - pos.avgCost;
       const posValLocal = curPrice * pos.shares;
       const posCostLocal = pos.avgCost * pos.shares;
       const pnlLocal = posValLocal - posCostLocal;
       const pnlPct = posCostLocal > 0 ? (pnlLocal / posCostLocal) * 100 : 0;
+
+      // Day P&L
+      const dayChange = pos.change || 0;
+      const dayPnlLocal = dayChange * pos.shares;
+      const dayPct = pos.pctChange || 0;
+
+      // Visual spread runway marker (50% is break-even)
+      let gaugeMarkerPos = 50;
+      if (pnlPct > 0) {
+        gaugeMarkerPos = Math.min(95, 50 + pnlPct * 1.5);
+      } else if (pnlPct < 0) {
+        gaugeMarkerPos = Math.max(5, 50 - Math.abs(pnlPct) * 1.5);
+      }
+      const isProfit = pnlLocal >= 0;
+      const fillLeft = isProfit ? 50 : gaugeMarkerPos;
+      const fillWidth = isProfit ? (gaugeMarkerPos - 50) : (50 - gaugeMarkerPos);
 
       const posValUSD = this.toUSD(posValLocal, pos.currency);
       const weightPct = totalValUSD > 0 ? (posValUSD / totalValUSD) * 100 : 0;
@@ -636,10 +726,51 @@ class PortfolioManager {
           </div>
         </div>
 
-        <div class="holding-stats-row mono">
-          <div><span style="color: var(--text-muted);">AVG COST:</span> ${currSymbol}${pos.avgCost.toLocaleString()}</div>
-          <div><span style="color: var(--text-muted);">PRICE:</span> ${currSymbol}${curPrice.toLocaleString()}</div>
-          <div><span style="color: var(--text-muted);">PORTFOLIO WT:</span> <strong style="color: ${weightPct > 20 ? 'var(--color-bear)' : 'var(--color-cyan)'};">${weightPct.toFixed(1)}%</strong></div>
+        <!-- TOP-TIER BROKER SPREAD & PERFORMANCE LINE -->
+        <div class="institutional-perf-track">
+          <div class="perf-track-header mono">
+            <div class="perf-metric">
+              <span class="lbl">AVG PURCHASE:</span>
+              <span class="val cyan">${currSymbol}${pos.avgCost.toFixed(2)}</span>
+            </div>
+            <div class="perf-metric">
+              <span class="lbl">CURRENT DAY PRICE:</span>
+              <span class="val" id="card-price-${pos.symbol}">${currSymbol}${curPrice.toFixed(2)}</span>
+            </div>
+            <div class="perf-metric" style="text-align: right;">
+              <span class="lbl">PER-SHARE SPREAD:</span>
+              <span class="val ${isProfit ? 'bull' : 'bear'}">${pnlPerShare >= 0 ? '+' : ''}${currSymbol}${pnlPerShare.toFixed(2)} (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Visual Break-Even Runway Line -->
+          <div class="broker-spread-gauge">
+            <div class="gauge-bar-track">
+              <div class="gauge-bar-fill ${isProfit ? 'fill-bull' : 'fill-bear'}" style="left: ${fillLeft}%; width: ${Math.max(3, fillWidth)}%;"></div>
+              <div class="gauge-marker-cost" style="left: 50%;" title="Average Cost Break-Even: ${currSymbol}${pos.avgCost.toFixed(2)}"></div>
+              <div class="gauge-marker-current" style="left: ${gaugeMarkerPos}%;" title="Current Day Price: ${currSymbol}${curPrice.toFixed(2)}"></div>
+            </div>
+            <div class="gauge-labels mono">
+              <span>AVG BREAK-EVEN (${currSymbol}${pos.avgCost.toFixed(2)})</span>
+              <span class="${isProfit ? 'bull' : 'bear'}">${isProfit ? '▲ PROFIT SPREAD' : '▼ DRAWDOWN'} (${isProfit ? '+' : ''}${currSymbol}${pnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+            </div>
+          </div>
+
+          <!-- Institutional 3-Column Performance Sub-Strip -->
+          <div class="institutional-pnl-substrip mono">
+            <div class="pnl-sub-box">
+              <span class="sub-lbl">TOTAL POSITION P&L</span>
+              <span class="sub-val ${isProfit ? 'bull' : 'bear'}">${isProfit ? '+' : ''}${currSymbol}${pnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)</span>
+            </div>
+            <div class="pnl-sub-box">
+              <span class="sub-lbl">TODAY'S DAY P&L</span>
+              <span class="sub-val ${dayPnlLocal >= 0 ? 'bull' : 'bear'}">${dayPnlLocal >= 0 ? '+' : ''}${currSymbol}${dayPnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${dayPct >= 0 ? '+' : ''}${dayPct.toFixed(2)}%)</span>
+            </div>
+            <div class="pnl-sub-box">
+              <span class="sub-lbl">PORTFOLIO WEIGHT</span>
+              <span class="sub-val cyan">${weightPct.toFixed(1)}% of Wealth</span>
+            </div>
+          </div>
         </div>
 
         <!-- ELITE TRADER ACTION MATRIX -->

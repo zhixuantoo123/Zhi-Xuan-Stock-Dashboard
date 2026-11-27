@@ -166,6 +166,9 @@
         <div class="stat-pill"><span class="stat-label">MACD:</span> <span class="stat-val" id="macd-val-badge">--</span></div>
       </div>
 
+      <!-- Institutional Portfolio Position Live Ribbon (Shown when charting owned asset) -->
+      <div class="chart-position-strip mono" id="chart-position-strip" style="display: none;"></div>
+
       <!-- Chart Toolbar -->
       <div class="chart-controls-bar">
         <!-- Timeframes & Historical Ranges -->
@@ -406,12 +409,33 @@
 
           <!-- SUBVIEW 1: HOLDINGS MATRIX -->
           <div id="portfolio-holdings-subview" style="display: flex; flex-direction: column; gap: 8px;">
-            <!-- Actions Toolbar -->
-            <div style="display: flex; gap: 6px; justify-content: space-between;">
-              <button class="form-btn" id="btn-open-add-holding" style="flex: 1; padding: 6px; font-size: 11px;">+ Add Position</button>
-              <button class="btn-icon" id="btn-import-csv" style="padding: 6px 10px; font-size: 11px;" title="Import CSV statement">📥 Import CSV</button>
-              <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
-              <button class="btn-icon" id="btn-clear-holdings" style="padding: 6px 10px; font-size: 11px; color: var(--color-bear);" title="Reset portfolio">🗑 Clear</button>
+            <!-- Institutional View-Only Security Bar -->
+            <div class="portfolio-security-bar">
+              <div class="security-badge-group">
+                <span class="shield-lock-badge">🔒 VIEW-ONLY</span>
+                <div>
+                  <div style="font-size: 11px; font-weight: 800; color: #FFF; letter-spacing: 0.04em;">
+                    VERIFIED AUDITED PORTFOLIO (READ-ONLY)
+                  </div>
+                  <div style="font-size: 9px; color: var(--color-cyan); font-weight: 700;">
+                    ZHI XUAN CAPITAL • INSTITUTIONAL STATEMENT AUDITED
+                  </div>
+                </div>
+              </div>
+              <button class="btn-manager-auth" id="btn-manager-auth" title="Owner Administration Unlock">
+                🔑 Manager Login
+              </button>
+            </div>
+
+            <!-- Management Tools (Strictly hidden by default; unlocked only via Owner PIN) -->
+            <div id="manager-edit-toolbar" style="display: none; margin-top: 4px;">
+              <div style="display: flex; gap: 6px; justify-content: space-between;">
+                <button class="form-btn" id="btn-open-add-holding" style="flex: 1; padding: 6px; font-size: 11px;">+ Add Position</button>
+                <button class="btn-icon" id="btn-import-csv" style="padding: 6px 10px; font-size: 11px;" title="Import CSV statement">📥 Import CSV</button>
+                <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                <button class="btn-icon" id="btn-clear-holdings" style="padding: 6px 10px; font-size: 11px; color: var(--color-bear);" title="Reset portfolio">🗑 Clear</button>
+                <button class="btn-icon" id="btn-lock-portfolio" style="padding: 6px 10px; font-size: 11px; color: var(--color-cyan);" title="Lock to View-Only">🔒 Lock View</button>
+              </div>
             </div>
 
             <!-- Holdings Position List -->

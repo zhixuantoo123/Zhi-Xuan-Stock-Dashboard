@@ -1386,6 +1386,205 @@ body {
   border-radius: 4px;
 }
 
+/* Institutional Chart Position Strip */
+.chart-position-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, rgba(0, 210, 255, 0.12) 0%, rgba(13, 19, 33, 0.95) 100%);
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 11px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 8px rgba(0, 210, 255, 0.15);
+}
+.chart-position-strip .pos-strip-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  margin-right: 8px;
+}
+.chart-position-strip .pos-strip-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chart-position-strip .sep {
+  color: var(--text-muted);
+}
+
+/* Institutional View-Only Security Bar */
+.portfolio-security-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(13, 20, 34, 0.95) 0%, rgba(9, 14, 24, 0.98) 100%);
+  border: 1px solid rgba(0, 240, 144, 0.25);
+  border-radius: 5px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+.security-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.shield-lock-badge {
+  font-size: 9px;
+  font-weight: 800;
+  color: #00F090;
+  background: rgba(0, 240, 144, 0.12);
+  border: 1px solid rgba(0, 240, 144, 0.35);
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.btn-manager-auth {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-manager-auth:hover {
+  background: rgba(0, 210, 255, 0.15);
+  border-color: var(--color-cyan);
+  color: var(--color-cyan);
+}
+.btn-manager-auth.unlocked {
+  background: rgba(0, 240, 144, 0.15);
+  border-color: #00F090;
+  color: #00F090;
+}
+
+/* Institutional Broker Performance Line & Gauge Track */
+.institutional-perf-track {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 5px;
+  padding: 8px 10px;
+  margin-top: 2px;
+}
+.perf-track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+}
+.perf-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.perf-metric .lbl {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.perf-metric .val {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* Dynamic Broker Spread Visual Bar Line */
+.broker-spread-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 3px 0;
+}
+.gauge-bar-track {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: #101624;
+  border-radius: 3px;
+  overflow: visible;
+  border: 1px solid #1C263B;
+}
+.gauge-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gauge-bar-fill.fill-bull {
+  background: linear-gradient(90deg, rgba(0, 240, 144, 0.3) 0%, rgba(0, 240, 144, 0.85) 100%);
+  box-shadow: 0 0 6px rgba(0, 240, 144, 0.4);
+}
+.gauge-bar-fill.fill-bear {
+  background: linear-gradient(90deg, rgba(255, 56, 92, 0.85) 0%, rgba(255, 56, 92, 0.3) 100%);
+  box-shadow: 0 0 6px rgba(255, 56, 92, 0.4);
+}
+.gauge-marker-cost {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--color-cyan);
+  box-shadow: 0 0 5px var(--color-cyan);
+  z-index: 2;
+}
+.gauge-marker-current {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 3px;
+  background: #FFF;
+  border-radius: 1px;
+  box-shadow: 0 0 6px #FFF;
+  z-index: 3;
+  transition: left 0.5s ease;
+}
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* 3-Column Institutional Sub-Strip */
+.institutional-pnl-substrip {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  text-align: center;
+}
+.pnl-sub-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.pnl-sub-box .sub-lbl {
+  color: var(--text-muted);
+  font-size: 8px;
+  font-weight: 700;
+}
+.pnl-sub-box .sub-val {
+  font-size: 10px;
+  font-weight: 800;
+}
+
 .elite-trader-box {
   background: linear-gradient(135deg, rgba(20, 26, 40, 0.9) 0%, rgba(15, 20, 32, 0.95) 100%);
   border-left: 3px solid #F5A623;
