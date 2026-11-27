@@ -198,7 +198,7 @@ class LivestreamManager {
       "width=1040,height=600,top=100,left=100,menubar=no,toolbar=no,location=no,status=no,resizable=yes"
     );
     if (popup) {
-      if (this.app) this.app.showToast(`📺 Opened 100% login-free stream: ${ch.name}`, "bull");
+      if (this.app) this.app.showToast(`Opened stream: ${ch.name}`, "bull");
     } else {
       window.open(`https://www.youtube.com/watch?v=${ch.videoId}`, "_blank");
     }
@@ -232,7 +232,7 @@ class LivestreamManager {
           </iframe>
         `;
       }
-      if (this.app) this.app.showToast(`📌 Detached ${ch.name} to Floating Picture-in-Picture`, "cyan");
+      if (this.app) this.app.showToast(`Detached ${ch.name} to Floating Picture-in-Picture`, "cyan");
     } else {
       this.closePip();
     }

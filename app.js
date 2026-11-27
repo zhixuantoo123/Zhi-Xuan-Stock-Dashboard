@@ -208,27 +208,53 @@ class TradingApp {
       closeVixGuideBtn.addEventListener("click", () => vixModal.classList.remove("open"));
     }
 
-    // Sound toggle
+    // Centered Modal Overlays backdrop click & ESC key dismissal
+    document.querySelectorAll(".modal-overlay").forEach(overlay => {
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove("open");
+        }
+      });
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal-overlay.open").forEach(m => m.classList.remove("open"));
+      }
+    });
+
+    // Collapsible Secondary Metrics Drawer
+    const statsToggle = document.getElementById("btn-toggle-stats-drawer");
+    const statsStrip = document.getElementById("chart-stats-strip");
+    if (statsToggle && statsStrip) {
+      statsToggle.addEventListener("click", () => {
+        statsStrip.classList.toggle("collapsed");
+        statsToggle.classList.toggle("active");
+      });
+    }
+
+    // Sound toggle (Monochromatic vector icon label)
     const soundToggle = document.getElementById("btn-toggle-sound");
+    const soundText = document.getElementById("sound-btn-text");
     if (soundToggle) {
       soundToggle.addEventListener("click", () => {
         this.soundEnabled = !this.soundEnabled;
         soundToggle.classList.toggle("active", this.soundEnabled);
-        soundToggle.textContent = this.soundEnabled ? "🔊 Sound ON" : "🔇 Sound OFF";
+        if (soundText) soundText.textContent = this.soundEnabled ? "Sound" : "Muted";
         this.showToast(`Alert sound chime ${this.soundEnabled ? 'enabled' : 'disabled'}`, "warn");
       });
     }
 
-    // Fullscreen toggle
+    // Fullscreen toggle (Monochromatic vector icon label)
     const fsToggle = document.getElementById("btn-toggle-fullscreen");
+    const fsText = document.getElementById("fs-btn-text");
     if (fsToggle) {
       fsToggle.addEventListener("click", () => {
         if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen();
-          fsToggle.textContent = "⤓ Exit Full";
+          document.documentElement.requestFullscreen().catch(() => {});
+          if (fsText) fsText.textContent = "Exit";
         } else {
-          document.exitFullscreen();
-          fsToggle.textContent = "⛶ Fullscreen";
+          document.exitFullscreen().catch(() => {});
+          if (fsText) fsText.textContent = "Fullscreen";
         }
       });
     }

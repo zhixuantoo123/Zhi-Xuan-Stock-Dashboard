@@ -164,7 +164,7 @@ class EconomicCalendar {
     const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
     const pad = (n) => String(n).padStart(2, '0');
-    banner.textContent = `NEXT: ${upcoming.flag} ${upcoming.name} in ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s (SGT)`;
+    banner.textContent = `NEXT: [${upcoming.currency}] ${upcoming.name} in ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s (SGT)`;
   }
 
   render() {
@@ -196,7 +196,7 @@ class EconomicCalendar {
       card.innerHTML = `
         <div class="event-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 16px;">${evt.flag}</span>
+            <span class="region-badge mono" style="font-size: 10px; font-weight: 800; background: var(--bg-card); color: var(--color-cyan); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border-subtle);">${evt.currency}</span>
             <span class="event-time-sgt mono">${sgtFormatted}</span>
           </div>
           <span class="event-impact-badge ${impactClass}">${evt.impact.toUpperCase()} IMPACT</span>

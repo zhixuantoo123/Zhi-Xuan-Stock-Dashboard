@@ -361,10 +361,11 @@ class PortfolioManager {
     const authBtn = document.getElementById("btn-manager-auth");
     if (editToolbar) editToolbar.style.display = "block";
     if (authBtn) {
-      authBtn.innerHTML = "🔓 Manager Mode";
+      authBtn.innerHTML = '<svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg> <span>Manager Mode</span>';
       authBtn.classList.add("unlocked");
     }
-    if (this.app) this.app.showToast("🔓 Manager mode unlocked: Position editing enabled", "cyan");
+    this.render();
+    if (this.app) this.app.showToast("Manager mode unlocked: Position editing enabled", "cyan");
   }
 
   lockPortfolio() {
@@ -374,10 +375,11 @@ class PortfolioManager {
     const authBtn = document.getElementById("btn-manager-auth");
     if (editToolbar) editToolbar.style.display = "none";
     if (authBtn) {
-      authBtn.innerHTML = "🔑 Manager Login";
+      authBtn.innerHTML = '<svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-1.5 1.5L16 7l-2-2-4 4-2-2-4 4 2 2-3 3 1.5 1.5L6 17l2 2 4-4-2-2 4-4 1.5 1.5 1.5-1.5z"></path></svg> <span>Manager Login</span>';
       authBtn.classList.remove("unlocked");
     }
-    if (this.app) this.app.showToast("🔒 Portfolio locked to View-Only mode", "bull");
+    this.render();
+    if (this.app) this.app.showToast("Portfolio locked to View-Only mode", "bull");
   }
 
   // Convert any price/value into USD equivalent
@@ -714,9 +716,16 @@ class PortfolioManager {
             </div>
           </div>
           <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
-            <button class="btn-direct-chart mono ${isCharted ? 'active' : ''}">
-              ${isCharted ? '● CHART ACTIVE' : '📈 VIEW CHART'}
-            </button>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              ${this.isManagerUnlocked ? `
+                <button class="btn-icon delete-pos-btn" data-del-symbol="${pos.symbol}" style="padding: 2px 6px; font-size: 10px; color: var(--color-bear);" title="Remove Position (Manager Only)">
+                  <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              ` : ''}
+              <button class="btn-direct-chart mono ${isCharted ? 'active' : ''}">
+                ${isCharted ? '● ACTIVE' : '<svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg> Chart'}
+              </button>
+            </div>
             <div class="mono" style="font-size: 14px; font-weight: 800;">
               ${currSymbol}${posValLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
@@ -773,11 +782,12 @@ class PortfolioManager {
           </div>
         </div>
 
-        <!-- ELITE TRADER ACTION MATRIX -->
+        <!-- INSTITUTIONAL TRADER ACTION MATRIX -->
         <div class="elite-trader-box">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-size: 9px; font-weight: 800; color: #FFF; text-transform: uppercase;">
-              👑 ELITE TRADER DIRECTIVE
+            <span style="font-size: 9px; font-weight: 800; color: #FFF; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+              <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              INSTITUTIONAL DIRECTIVE
             </span>
             <span class="opp-type-badge ${verdict.actionClass}">${verdict.action}</span>
           </div>
@@ -793,11 +803,25 @@ class PortfolioManager {
         </div>
       `;
 
+      // Wire manager delete button if present
+      const delBtn = card.querySelector(".delete-pos-btn");
+      if (delBtn) {
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(`Remove position ${pos.symbol} (${pos.name})?`)) {
+            this.holdings = this.holdings.filter(h => h.symbol !== pos.symbol);
+            this.saveHoldings();
+            this.render();
+            if (this.app) this.app.showToast(`Removed position ${pos.symbol}`, "bear");
+          }
+        });
+      }
+
       card.addEventListener("click", () => {
         if (this.app) {
           this.app.selectAsset(pos.symbol);
           this.highlightActiveHolding(pos.symbol);
-          this.app.showToast(`🎯 Directing to ${pos.symbol} (${pos.name}) live chart`, "bull");
+          this.app.showToast(`Viewing ${pos.symbol} (${pos.name}) live chart`, "bull");
         }
       });
 
