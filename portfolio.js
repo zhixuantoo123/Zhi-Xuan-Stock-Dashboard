@@ -979,6 +979,7 @@ class PortfolioManager {
       const fillWidth = isProfit ? (gaugeMarkerPos - 50) : (50 - gaugeMarkerPos);
 
       const posValUSD = this.toUSD(posValLocal, pos.currency);
+      const posValSGD = this.toSGD(posValLocal, pos.currency);
       const totalPortfolioUSD = this.fromSGD(totalAssetsSGD, "USD");
       const weightPct = totalAssetsSGD > 0 ? (posValSGD / totalAssetsSGD) * 100 : 0;
 

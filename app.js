@@ -45,16 +45,19 @@ class TradingApp {
     this.marketItems = this.getDefaultMarketItems();
     this.selectedItem = this.marketItems.find(x => x.symbol === this.selectedSymbol) || this.marketItems[0];
 
-    this.initChart();
-    this.initSubmodules();
-    this.initUIListeners();
-    this.initClocks();
-    this.initWebSocket();
-    this.updateHeaderPrice(this.selectedItem);
-    this.updateVixWidget({ price: 28.29 });
-    this.renderWatchlist();
-    this.renderTickerRibbon();
-    this.renderAlertsList();
+    // 1. Render core UI immediately from guaranteed baseline data
+    try { this.updateHeaderPrice(this.selectedItem); } catch(e) { console.warn("Header price error:", e); }
+    try { this.updateVixWidget({ price: 28.29 }); } catch(e) { console.warn("VIX widget error:", e); }
+    try { this.renderWatchlist(); } catch(e) { console.warn("Watchlist render error:", e); }
+    try { this.renderTickerRibbon(); } catch(e) { console.warn("Ticker ribbon error:", e); }
+    try { this.renderAlertsList(); } catch(e) { console.warn("Alerts render error:", e); }
+
+    // 2. Initialize submodules & interactive listeners
+    try { this.initChart(); } catch(e) { console.warn("Chart init error:", e); }
+    try { this.initSubmodules(); } catch(e) { console.warn("Submodules init error:", e); }
+    try { this.initUIListeners(); } catch(e) { console.warn("UI listeners error:", e); }
+    try { this.initClocks(); } catch(e) { console.warn("Clocks init error:", e); }
+    try { this.initWebSocket(); } catch(e) { console.warn("WebSocket init error:", e); }
 
     // Initial data fetch & chart load (non-blocking with fault tolerance)
     try {
@@ -1262,7 +1265,15 @@ class TradingApp {
   }
 }
 
-// Instantiate on DOM load
-window.addEventListener("DOMContentLoaded", () => {
-  window.app = new TradingApp();
-});
+// Instantiate on DOM load or immediately if DOM is already ready
+function startTradingDashboard() {
+  if (!window.app) {
+    window.app = new TradingApp();
+  }
+}
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", startTradingDashboard);
+} else {
+  startTradingDashboard();
+}
