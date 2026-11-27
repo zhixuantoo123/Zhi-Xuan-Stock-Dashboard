@@ -1,0 +1,5 @@
+# Ignore large binary files
+*.exe
+cloudflared.exe
+.DS_Store
+Thumbs.db
