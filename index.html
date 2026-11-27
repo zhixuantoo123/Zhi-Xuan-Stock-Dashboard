@@ -32,6 +32,38 @@
       </div>
     </div>
 
+    <!-- Center: World Clocks (Inline on Desktop, dedicated strip on Mobile) -->
+    <div class="market-clocks" id="market-clocks-header">
+      <div class="clock-item">
+        <div class="clock-header">
+          <span class="market-status-dot status-open"></span>
+          <span class="status-sgt">SINGAPORE (SGT)</span>
+        </div>
+        <div class="mono clock-val" id="clock-sgt">--:--:--</div>
+      </div>
+      <div class="clock-item">
+        <div class="clock-header">
+          <span class="market-status-dot status-closed"></span>
+          <span>NEW YORK (EST)</span>
+        </div>
+        <div class="mono clock-val" id="clock-nyc">--:--:--</div>
+      </div>
+      <div class="clock-item">
+        <div class="clock-header">
+          <span class="market-status-dot status-open"></span>
+          <span>LONDON (GMT)</span>
+        </div>
+        <div class="mono clock-val" id="clock-lon">--:--:--</div>
+      </div>
+      <div class="clock-item">
+        <div class="clock-header">
+          <span class="market-status-dot status-open"></span>
+          <span>TOKYO (JST)</span>
+        </div>
+        <div class="mono clock-val" id="clock-tyo">--:--:--</div>
+      </div>
+    </div>
+
     <!-- Header Right: VIX Volatility & Action Controls -->
     <div class="top-header-right">
       <!-- VIX Volatility & Fear Index Widget -->
@@ -64,39 +96,6 @@
     </div>
   </header>
 
-  <!-- DEDICATED WORLD CLOCKS STRIP (Single horizontal scrollable ticker, zero collision) -->
-  <div class="market-clocks-strip" id="market-clocks-strip">
-    <div class="market-clocks">
-      <div class="clock-item">
-        <div class="clock-header">
-          <span class="market-status-dot status-open"></span>
-          <span class="status-sgt">SINGAPORE (SGT)</span>
-        </div>
-        <div class="mono clock-val" id="clock-sgt">--:--:--</div>
-      </div>
-      <div class="clock-item">
-        <div class="clock-header">
-          <span class="market-status-dot status-closed"></span>
-          <span>NEW YORK (EST)</span>
-        </div>
-        <div class="mono clock-val" id="clock-nyc">--:--:--</div>
-      </div>
-      <div class="clock-item">
-        <div class="clock-header">
-          <span class="market-status-dot status-open"></span>
-          <span>LONDON (GMT)</span>
-        </div>
-        <div class="mono clock-val" id="clock-lon">--:--:--</div>
-      </div>
-      <div class="clock-item">
-        <div class="clock-header">
-          <span class="market-status-dot status-open"></span>
-          <span>TOKYO (JST)</span>
-        </div>
-        <div class="mono clock-val" id="clock-tyo">--:--:--</div>
-      </div>
-    </div>
-  </div>
   <!-- Instant Client-Side Zero-Latency Clock Calculator -->
   <script>
     (function() {

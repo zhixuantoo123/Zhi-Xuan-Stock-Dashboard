@@ -48,8 +48,8 @@ class TradingChartManager {
     this.container.innerHTML = "";
 
     this.chart = LightweightCharts.createChart(this.container, {
-      width: this.container.clientWidth,
-      height: this.container.clientHeight,
+      width: this.container.clientWidth || 800,
+      height: this.container.clientHeight || 450,
       layout: {
         background: { type: 'solid', color: '#080B10' },
         textColor: '#94A3B8',
@@ -178,6 +178,13 @@ class TradingChartManager {
     if (!data || data.length === 0) return;
     this.currentData = data;
     this.currentSymbol = symbol;
+
+    if (this.chart && this.container && this.container.clientWidth > 0 && this.container.clientHeight > 0) {
+      this.chart.applyOptions({
+        width: this.container.clientWidth,
+        height: this.container.clientHeight
+      });
+    }
 
     // Set candlestick data
     if (this.candleSeries) {

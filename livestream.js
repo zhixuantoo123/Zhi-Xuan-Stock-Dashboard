@@ -212,5 +212,3 @@ class LivestreamManager {
 }
 
 window.LivestreamManager = LivestreamManager;
-
-window.LivestreamManager = LivestreamManager;

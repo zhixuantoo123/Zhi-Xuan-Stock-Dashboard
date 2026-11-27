@@ -1999,10 +1999,30 @@ html, body {
     height: 100vh;
     overflow: hidden;
   }
+  .top-header {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    flex-wrap: nowrap;
+    background: #060910;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .market-clocks {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .top-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
   .dashboard-workspace {
     display: grid;
     grid-template-columns: 270px 1fr 390px;
-    height: calc(100vh - 48px - 34px - 40px);
+    height: calc(100vh - 44px - 34px);
     overflow: hidden;
   }
   .panel {
@@ -2092,27 +2112,28 @@ html, body {
     margin: 0 !important;
   }
 
-  /* 1. Single-Row 48px Compact Top Bar */
+  /* 1. Header with Dedicated Clocks Strip on Mobile */
   .top-header {
     position: sticky !important;
     top: 0 !important;
     z-index: 100 !important;
-    height: 48px !important;
+    height: auto !important;
     min-height: 48px !important;
-    max-height: 48px !important;
     display: flex !important;
-    flex-direction: row !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
     justify-content: space-between !important;
-    flex-wrap: nowrap !important;
-    padding: 0 10px !important;
+    padding: 0 !important;
     background: #060910 !important;
     border-bottom: 1px solid var(--border-subtle) !important;
   }
   .brand-section {
+    order: 1 !important;
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
+    height: 48px !important;
+    padding: 0 10px !important;
   }
   .brand-logo {
     font-size: 13px !important;
@@ -2132,8 +2153,17 @@ html, body {
   .status-live-text {
     font-size: 9px !important;
   }
+
+  .top-header-right {
+    order: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: 48px !important;
+    padding: 0 10px !important;
+    margin-left: auto !important;
+  }
   .vix-header-box {
-    margin: 0 auto !important;
     padding: 3px 8px !important;
     height: 28px !important;
     background: rgba(255, 56, 92, 0.12) !important;
@@ -2163,23 +2193,25 @@ html, body {
     display: none !important;
   }
 
-  /* 2. Dedicated Single-Row Horizontally Scrollable World Clocks Strip */
-  .market-clocks-strip {
+  /* 2. Dedicated Single-Row Horizontally Scrollable World Clocks Strip on Mobile */
+  .market-clocks {
+    order: 3 !important;
+    width: 100% !important;
     display: flex !important;
     align-items: center !important;
     gap: 16px !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
     scrollbar-width: none !important;
-    padding: 6px 12px !important;
+    padding: 4px 10px !important;
     background: #080C14 !important;
-    border-bottom: 1px solid var(--border-subtle) !important;
+    border-top: 1px solid var(--border-subtle) !important;
     font-size: 11px !important;
-    min-height: 34px !important;
-    height: auto !important;
+    min-height: 32px !important;
+    height: 32px !important;
     margin: 0 !important;
   }
-  .market-clocks-strip::-webkit-scrollbar {
+  .market-clocks::-webkit-scrollbar {
     display: none;
   }
   .clock-item {
