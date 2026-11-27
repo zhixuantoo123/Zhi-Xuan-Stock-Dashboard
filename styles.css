@@ -52,10 +52,8 @@ html, body {
   font-family: var(--font-sans);
   font-size: 12.5px;
   line-height: 1.4;
-  overflow: hidden;
-  height: 100vh;
-  max-height: 100vh;
-  width: 100vw;
+  width: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -1997,14 +1995,14 @@ html, body {
 
 /* DESKTOP / LAPTOP (>= 1024px): Multi-pane viewport grid */
 @media (min-width: 1024px) {
-  body {
+  html, body {
     height: 100vh;
     overflow: hidden;
   }
   .dashboard-workspace {
     display: grid;
     grid-template-columns: 270px 1fr 390px;
-    height: calc(100vh - 42px - 28px);
+    height: calc(100vh - 48px - 34px - 40px);
     overflow: hidden;
   }
   .panel {
@@ -2029,19 +2027,6 @@ html, body {
   }
   #chart-stats-strip.collapsed {
     display: none !important;
-  }
-}
-
-/* INTERMEDIATE / TABLET (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .dashboard-workspace {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    height: auto;
-    overflow-y: auto;
-  }
-  .hub-workspace {
-    grid-column: span 2;
   }
 }
 
@@ -2088,18 +2073,20 @@ html, body {
   display: none;
 }
 
-/* MOBILE PORTRAIT (< 768px): Thumb-friendly single-column layout */
-@media (max-width: 768px) {
-  body {
-    height: auto;
-    overflow-y: auto;
+/* MOBILE & TABLET (< 1024px): Thumb-friendly single-column layout with native scrolling */
+@media (max-width: 1023px) {
+  html, body {
+    min-height: 100vh !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
   .dashboard-workspace {
     display: flex !important;
     flex-direction: column !important;
     height: auto !important;
-    min-height: 0 !important;
-    padding-bottom: 76px !important; /* space for fixed bottom nav */
+    min-height: 100vh !important;
+    padding-bottom: 96px !important; /* space for fixed bottom nav */
     overflow-y: visible !important;
     gap: 0 !important;
     margin: 0 !important;
@@ -2176,23 +2163,23 @@ html, body {
     display: none !important;
   }
 
-  /* 2. Single-Row Horizontally Scrollable World Clocks Strip */
-  .market-clocks {
+  /* 2. Dedicated Single-Row Horizontally Scrollable World Clocks Strip */
+  .market-clocks-strip {
     display: flex !important;
     align-items: center !important;
     gap: 16px !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
     scrollbar-width: none !important;
-    padding: 5px 12px !important;
+    padding: 6px 12px !important;
     background: #080C14 !important;
     border-bottom: 1px solid var(--border-subtle) !important;
     font-size: 11px !important;
-    height: 32px !important;
-    min-height: 32px !important;
+    min-height: 34px !important;
+    height: auto !important;
     margin: 0 !important;
   }
-  .market-clocks::-webkit-scrollbar {
+  .market-clocks-strip::-webkit-scrollbar {
     display: none;
   }
   .clock-item {
@@ -2212,100 +2199,32 @@ html, body {
     font-weight: 700 !important;
   }
 
-  /* 3. Ticker Ribbon on Mobile: Zero Empty Gaps */
+  /* 3. Ticker Ribbon on Mobile: Zero Vertical Clipping */
   .ticker-ribbon-container {
-    height: 28px !important;
-    min-height: 28px !important;
+    height: auto !important;
+    min-height: 40px !important;
+    padding: 6px 12px !important;
     margin: 0 !important;
     background: #060910 !important;
     border-bottom: 1px solid var(--border-subtle) !important;
   }
 
-  /* 4. Compact Watchlist Selector (Horizontal Swipeable Ticker Pills above Chart) */
+  /* 4. Hide Desktop Left Sidebar on Mobile/Tablet */
   .panel {
-    border: none !important;
-    max-height: none !important;
-    height: auto !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    background: #070B14 !important;
-    order: 1 !important;
-  }
-  .panel-header,
-  .watchlist-controls {
     display: none !important;
-  }
-  .watchlist-items {
-    display: flex !important;
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    scrollbar-width: none !important;
-    padding: 4px 8px !important;
-    gap: 6px !important;
-    background: #070B14 !important;
-    border-bottom: 1px solid var(--border-subtle) !important;
-    margin: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
-  }
-  .watchlist-items::-webkit-scrollbar {
-    display: none;
-  }
-  .asset-row {
-    flex-shrink: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    padding: 3px 8px !important;
-    border-radius: 14px !important;
-    background: #0D1321 !important;
-    border: 1px solid #1C273D !important;
-    margin: 0 !important;
-    height: 26px !important;
-  }
-  .asset-row.active {
-    background: rgba(0, 210, 255, 0.15) !important;
-    border-color: var(--color-cyan) !important;
-    box-shadow: 0 0 10px rgba(0, 210, 255, 0.25) !important;
-  }
-  .asset-row .asset-name,
-  .asset-row .asset-badge-live,
-  .asset-row .asset-badge-delayed,
-  .asset-row .range-mini-container {
-    display: none !important;
-  }
-  .asset-row .asset-left {
-    display: flex !important;
-    align-items: center !important;
-  }
-  .asset-row .asset-symbol {
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    color: var(--text-bright) !important;
-  }
-  .asset-row .asset-price {
-    font-size: 11px !important;
-    font-weight: 700 !important;
-  }
-  .asset-row .asset-change-pill {
-    font-size: 9px !important;
-    padding: 1px 4px !important;
-    border-radius: 3px !important;
   }
 
-  /* 5. Center Panel / Chart First on Mobile */
+  /* 5. Chart First on Mobile */
   .chart-workspace {
-    order: 2 !important;
+    order: 1 !important;
     height: auto !important;
     min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
   }
   .chart-canvas-container {
-    height: 34vh !important;
-    min-height: 240px !important;
+    height: 38vh !important;
+    min-height: 250px !important;
   }
   .chart-controls-bar {
     display: flex !important;
@@ -2364,7 +2283,7 @@ html, body {
 
   /* 6. Right Panel / Workspace Views on Mobile */
   .hub-workspace {
-    order: 3 !important;
+    order: 2 !important;
     height: auto !important;
     min-height: 0 !important;
     padding: 0 0 24px 0 !important;
@@ -2569,13 +2488,6 @@ html, body {
   }
 
   /* 44x44px touch height on interactive triggers */
-  .pip-ctrl-btn {
-    min-width: 44px !important;
-    min-height: 44px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
   .btn-stats-drawer-toggle,
   .btn-manager-auth,
   .ai-ask-btn,
@@ -2603,6 +2515,27 @@ html, body {
   #watchlist-search-input,
   #news-search-input {
     font-size: 16px !important;
+  }
+}
+
+/* Short Viewport / Landscape Mobile Phone Optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  .top-header {
+    position: static !important;
+  }
+  .chart-canvas-container {
+    height: 65vh !important;
+    min-height: 260px !important;
+  }
+  .chart-workspace {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  .mobile-bottom-nav {
+    position: static !important;
+  }
+  .dashboard-workspace {
+    padding-bottom: 24px !important;
   }
 }
 

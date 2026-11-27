@@ -46,6 +46,7 @@ class PortfolioManager {
     this.initCurrencySelector();
     this.updatePrivacyUI();
     this.render();
+    this.fetchLiveFxRates();
   }
 
   loadHoldings() {
@@ -510,6 +511,87 @@ class PortfolioManager {
       btn.classList.toggle("active", this.isMasked);
       btn.title = this.isMasked ? "Private Mode Active (Click to Reveal Balances)" : "Click to Mask Private Balances (••••••)";
     }
+  }
+
+  // Base converter: from holding currency to SGD base
+  async fetchLiveFxRates() {
+    const CACHE_KEY = "live_fx_rates_sgd_cache";
+    const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { timestamp, rates } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TTL_MS && rates) {
+          this.applyFxRates(rates);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Error reading FX cache:", e);
+    }
+
+    try {
+      // Primary: Open ER API free tier (no API key required)
+      const res = await fetch("https://open.er-api.com/v6/latest/SGD");
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.rates) {
+          const rates = {
+            SGD: 1.0,
+            USD: Number(data.rates.USD) || 0.7749,
+            HKD: Number(data.rates.HKD) || 6.0736,
+            CNH: Number(data.rates.CNH || data.rates.CNY) || 5.1618,
+            AUD: Number(data.rates.AUD) || 1.1671,
+            NZD: Number(data.rates.NZD) || 1.4157
+          };
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), rates }));
+          this.applyFxRates(rates);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Primary FX fetch failed, trying fallback:", err);
+    }
+
+    try {
+      // Fallback: Frankfurter free API
+      const res = await fetch("https://api.frankfurter.app/latest?from=SGD");
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.rates) {
+          const rates = {
+            SGD: 1.0,
+            USD: Number(data.rates.USD) || this.fxRates.USD,
+            HKD: Number(data.rates.HKD) || this.fxRates.HKD,
+            CNH: Number(data.rates.CNH || data.rates.CNY) || this.fxRates.CNH,
+            AUD: Number(data.rates.AUD) || this.fxRates.AUD,
+            NZD: Number(data.rates.NZD) || this.fxRates.NZD
+          };
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), rates }));
+          this.applyFxRates(rates);
+        }
+      }
+    } catch (fallbackErr) {
+      console.warn("Fallback FX fetch failed, retaining defaults:", fallbackErr);
+    }
+  }
+
+  applyFxRates(rates) {
+    if (!rates) return;
+    Object.assign(this.fxRates, rates);
+    this.fx = {
+      USDSGD: 1 / (this.fxRates.USD || 0.7749),
+      USDHKD: (this.fxRates.HKD || 6.0736) / (this.fxRates.USD || 0.7749)
+    };
+    this.currencies.forEach(c => {
+      const r = this.fxRates[c.code];
+      if (r !== undefined) {
+        c.rateDesc = `1 SGD = ${Number(r).toFixed(4)} ${c.code}`;
+      }
+    });
+    this.renderCurrencyDropdown();
+    this.render();
   }
 
   // Base converter: from holding currency to SGD base

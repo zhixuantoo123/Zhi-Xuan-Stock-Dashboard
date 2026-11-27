@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <!-- TOP HEADER -->
+  <!-- TOP HEADER (Single-row flex items-center justify-between) -->
   <header class="top-header">
     <div class="brand-section">
       <div class="brand-logo">
@@ -32,7 +32,40 @@
       </div>
     </div>
 
-    <!-- World Clocks with SGT Emphasis -->
+    <!-- Header Right: VIX Volatility & Action Controls -->
+    <div class="top-header-right">
+      <!-- VIX Volatility & Fear Index Widget -->
+      <div class="vix-header-box" id="btn-open-vix-modal" title="Click to view detailed VIX Volatility Guide & numbers">
+        <div style="display: flex; align-items: baseline; gap: 6px;">
+          <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">VIX:</span>
+          <span class="mono" id="vix-header-val" style="font-size: 13px; font-weight: 800;">28.29</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px; font-size: 10px;">
+          <span id="vix-regime-badge" class="ribbon-badge mono bear-bg">ELEVATED (20-30)</span>
+          <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        </div>
+      </div>
+
+      <!-- Header Actions (System controls) -->
+      <div class="header-actions">
+        <button class="btn-icon active" id="btn-toggle-sound" title="Toggle Sound Chime">
+          <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <span class="btn-label" id="sound-btn-text">Sound</span>
+        </button>
+        <button class="btn-icon" id="btn-open-settings" title="Dashboard Settings">
+          <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span class="btn-label">Settings</span>
+        </button>
+        <button class="btn-icon" id="btn-toggle-fullscreen" title="Toggle Fullscreen">
+          <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          <span class="btn-label" id="fs-btn-text">Fullscreen</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- DEDICATED WORLD CLOCKS STRIP (Single horizontal scrollable ticker, zero collision) -->
+  <div class="market-clocks-strip" id="market-clocks-strip">
     <div class="market-clocks">
       <div class="clock-item">
         <div class="clock-header">
@@ -63,47 +96,19 @@
         <div class="mono clock-val" id="clock-tyo">--:--:--</div>
       </div>
     </div>
-    <!-- Instant Client-Side Zero-Latency Clock Calculator -->
-    <script>
-      (function() {
-        try {
-          const fmt = (tz) => new Date().toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-          const s = document.getElementById("clock-sgt"); if (s) s.textContent = fmt("Asia/Singapore");
-          const n = document.getElementById("clock-nyc"); if (n) n.textContent = fmt("America/New_York");
-          const l = document.getElementById("clock-lon"); if (l) l.textContent = fmt("Europe/London");
-          const t = document.getElementById("clock-tyo"); if (t) t.textContent = fmt("Asia/Tokyo");
-        } catch(e){}
-      })();
-    </script>
-
-    <!-- VIX Volatility & Fear Index Widget -->
-    <div class="vix-header-box" id="btn-open-vix-modal" title="Click to view detailed VIX Volatility Guide & numbers">
-      <div style="display: flex; align-items: baseline; gap: 6px;">
-        <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">VIX:</span>
-        <span class="mono" id="vix-header-val" style="font-size: 13px; font-weight: 800;">28.29</span>
-      </div>
-      <div style="display: flex; align-items: center; gap: 5px; font-size: 10px;">
-        <span id="vix-regime-badge" class="ribbon-badge mono bear-bg">ELEVATED (20-30)</span>
-        <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-      </div>
-    </div>
-
-    <!-- Header Actions (Live TV removed; strictly system controls) -->
-    <div class="header-actions">
-      <button class="btn-icon active" id="btn-toggle-sound" title="Toggle Sound Chime">
-        <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-        <span class="btn-label" id="sound-btn-text">Sound</span>
-      </button>
-      <button class="btn-icon" id="btn-open-settings" title="Dashboard Settings">
-        <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <span class="btn-label">Settings</span>
-      </button>
-      <button class="btn-icon" id="btn-toggle-fullscreen" title="Toggle Fullscreen">
-        <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-        <span class="btn-label" id="fs-btn-text">Fullscreen</span>
-      </button>
-    </div>
-  </header>
+  </div>
+  <!-- Instant Client-Side Zero-Latency Clock Calculator -->
+  <script>
+    (function() {
+      try {
+        const fmt = (tz) => new Date().toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+        const s = document.getElementById("clock-sgt"); if (s) s.textContent = fmt("Asia/Singapore");
+        const n = document.getElementById("clock-nyc"); if (n) n.textContent = fmt("America/New_York");
+        const l = document.getElementById("clock-lon"); if (l) l.textContent = fmt("Europe/London");
+        const t = document.getElementById("clock-tyo"); if (t) t.textContent = fmt("Asia/Tokyo");
+      } catch(e){}
+    })();
+  </script>
 
   <!-- TICKER RIBBON -->
   <div class="ticker-ribbon-container">
