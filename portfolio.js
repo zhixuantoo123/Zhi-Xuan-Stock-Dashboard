@@ -19,6 +19,7 @@ class PortfolioManager {
     this.displayCurrency = "USD"; // USD or SGD toggle
     this.container = document.getElementById("portfolio-view-container");
     this.initUI();
+    this.render();
   }
 
   loadHoldings() {
@@ -882,7 +883,7 @@ class PortfolioManager {
     if (!container) return;
 
     // Get live VIX from marketItems
-    const vixItem = this.app.marketItems.find(x => x.symbol === "^VIX" || x.id === "VIX");
+    const vixItem = this.app && this.app.marketItems ? this.app.marketItems.find(x => x.symbol === "^VIX" || x.id === "VIX") : null;
     const vixVal = vixItem && vixItem.price ? vixItem.price : 28.29;
     const rule16Daily = (vixVal / 16).toFixed(2);
 

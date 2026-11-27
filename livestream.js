@@ -7,24 +7,25 @@ class LivestreamManager {
     this.secondaryChannel = "bloomberg";
     this.mode = "single"; // "single" | "dual"
     this.isPipActive = false;
-    this.activeSource = "youtube"; // "youtube" | "direct"
 
-    // Verified permanent 24/7 Channel video IDs and direct portals viewable in Singapore with zero login
+    // Verified permanent 24/7 Channel IDs viewable in Singapore with zero login required
     this.channels = {
       cna: {
         id: "cna",
         name: "CNA (Channel NewsAsia)",
         badge: "SINGAPORE // 24/7 LIVE ASIA",
-        videoId: "-PWMxjBgr0k", // Verified active 24/7 live video ID for CNA
+        channelId: "UC83jt4dlz1Gjl58fzQrrKZg",
+        youtubeLiveUrl: "https://www.youtube.com/channel/UC83jt4dlz1Gjl58fzQrrKZg/live",
         directUrl: "https://www.channelnewsasia.com/watch",
-        mewatchUrl: "https://www.mewatch.sg/channels/cna/108502",
         desc: "Singapore's premier English-language 24/7 news channel broadcasting comprehensive Asian and global market intelligence, MAS policy, SGX trading sessions, and breaking world events."
       },
       bloomberg: {
         id: "bloomberg",
         name: "Bloomberg Television",
         badge: "USA // GLOBAL FINANCE",
-        videoId: "dp8PhLsUcFE", // Bloomberg live market coverage
+        channelId: "UCIALMKvObZNtJ6AmdCLP7Lg",
+        fallbackChannelId: "UCUMZ7gohGI9HcU9VNsr2FJQ",
+        youtubeLiveUrl: "https://www.youtube.com/channel/UCIALMKvObZNtJ6AmdCLP7Lg/live",
         directUrl: "https://www.bloomberg.com/live",
         desc: "24/7 institutional global market broadcast covering Wall Street, Asian stock exchanges, bond yields, currency movements, and Federal Reserve commentary."
       },
@@ -32,7 +33,8 @@ class LivestreamManager {
         id: "skynews",
         name: "Sky News Live",
         badge: "UK // 24/7 WORLD NEWS",
-        videoId: "9Auq9mYxFEE", // Sky News Live 24/7
+        channelId: "UCoMdktPbSTixAyNGwb-UYkQ",
+        youtubeLiveUrl: "https://www.youtube.com/channel/UCoMdktPbSTixAyNGwb-UYkQ/live",
         directUrl: "https://news.sky.com/watch-live",
         desc: "London-based 24/7 international breaking news network tracking European macro, global geopolitical conflicts, and world financial developments."
       },
@@ -40,7 +42,8 @@ class LivestreamManager {
         id: "france24",
         name: "France 24 English",
         badge: "FRANCE // GLOBAL NEWS",
-        videoId: "h3MuIUNCCzI", // France 24 English Live 24/7
+        channelId: "UCQfwfsi5VrQ8yKZ-UWmAEFg",
+        youtubeLiveUrl: "https://www.youtube.com/channel/UCQfwfsi5VrQ8yKZ-UWmAEFg/live",
         directUrl: "https://www.france24.com/en/live",
         desc: "International French & European news broadcasting in English 24/7 with comprehensive coverage of global diplomacy, commodities, and European market trends."
       },
@@ -48,7 +51,8 @@ class LivestreamManager {
         id: "dwnews",
         name: "DW News (Deutsche Welle)",
         badge: "GERMANY // GLOBAL MACRO",
-        videoId: "gCNeDWCI0Q0", // DW News Live
+        channelId: "UCknLrEdhRCp1aegoMqRaCZg",
+        youtubeLiveUrl: "https://www.youtube.com/channel/UCknLrEdhRCp1aegoMqRaCZg/live",
         directUrl: "https://www.dw.com/en/live-tv/s-100825",
         desc: "Berlin-based international broadcaster delivering comprehensive macroeconomic analysis, diplomatic negotiations, and supply chain tracking."
       },
@@ -56,38 +60,14 @@ class LivestreamManager {
         id: "aljazeera",
         name: "Al Jazeera English",
         badge: "MIDDLE EAST // ENERGY",
-        videoId: "bNyUyrR0PHo", // Al Jazeera English Live
+        channelId: "UCNye-wNBqNL5ZzHSJj3l8Bg",
+        youtubeLiveUrl: "https://www.youtube.com/channel/UCNye-wNBqNL5ZzHSJj3l8Bg/live",
         directUrl: "https://www.aljazeera.com/live",
         desc: "World news wire with premier real-time coverage of Middle Eastern geopolitics, Red Sea shipping routes, and OPEC+ crude oil markets."
-      },
-      euronews: {
-        id: "euronews",
-        name: "Euronews English",
-        badge: "EUROPE // CONTINENTAL",
-        videoId: "pykpO5kQJ98", // Euronews English Live
-        directUrl: "https://www.euronews.com/live",
-        desc: "Pan-European economic and political news tracking European Central Bank (ECB) rate policy, DAX/FTSE trading sessions, and continental developments."
       }
     };
 
     this.initUI();
-    this.refreshLiveIds();
-  }
-
-  // Self-healing: query backend to ensure live video IDs are always 100% current
-  async refreshLiveIds() {
-    try {
-      const res = await fetch("/api/live-id?channel=" + this.currentChannel);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.videoId && this.channels[this.currentChannel]) {
-          this.channels[this.currentChannel].videoId = json.videoId;
-          this.render();
-        }
-      }
-    } catch (e) {
-      // Offline or sandboxed: verified fallback IDs remain active
-    }
   }
 
   initUI() {
@@ -114,16 +94,19 @@ class LivestreamManager {
     const pipBtn = document.getElementById("btn-stream-pip");
     const popoutBtn = document.getElementById("btn-stream-popout");
     const portalBtn = document.getElementById("btn-stream-portal");
+    const ytBtn = document.getElementById("btn-stream-yt");
 
     if (singleBtn) singleBtn.addEventListener("click", () => this.setMode("single"));
     if (dualBtn) dualBtn.addEventListener("click", () => this.setMode("dual"));
     if (pipBtn) pipBtn.addEventListener("click", () => this.togglePipMode());
     if (popoutBtn) popoutBtn.addEventListener("click", () => this.openCleanPopout());
     if (portalBtn) portalBtn.addEventListener("click", () => this.openDirectPortal());
+    if (ytBtn) ytBtn.addEventListener("click", () => this.openYouTubeLive());
 
     // PiP window buttons
     const closePipBtn = document.getElementById("btn-pip-close");
     const dockPipBtn = document.getElementById("btn-pip-dock");
+    const ytPipBtn = document.getElementById("btn-pip-yt");
     if (closePipBtn) closePipBtn.addEventListener("click", () => this.closePip());
     if (dockPipBtn) {
       dockPipBtn.addEventListener("click", () => {
@@ -131,6 +114,7 @@ class LivestreamManager {
         this.toggleHubView();
       });
     }
+    if (ytPipBtn) ytPipBtn.addEventListener("click", () => this.openYouTubeLive());
 
     // News tab quick-toggle livestream banner
     const newsExpandBtn = document.getElementById("btn-news-tv-toggle");
@@ -155,7 +139,6 @@ class LivestreamManager {
     pills.forEach(p => p.classList.toggle("active", p.dataset.channel === channelKey));
 
     this.render();
-    this.refreshLiveIds();
   }
 
   setMode(mode) {
@@ -187,11 +170,20 @@ class LivestreamManager {
     this.render();
   }
 
+  // Open on YouTube Live fallback
+  openYouTubeLive() {
+    const ch = this.channels[this.currentChannel];
+    if (!ch) return;
+    const url = ch.youtubeLiveUrl || `https://www.youtube.com/channel/${ch.channelId}/live`;
+    window.open(url, "_blank");
+    if (this.app) this.app.showToast(`Opened ${ch.name} on YouTube ↗`, "bull");
+  }
+
   // Standalone Popout Window - 100% Zero Login, Fullscreen HD
   openCleanPopout() {
     const ch = this.channels[this.currentChannel];
     if (!ch) return;
-    const url = `https://www.youtube-nocookie.com/embed/${ch.videoId}?autoplay=1&mute=0&controls=1&playsinline=1&modestbranding=1&rel=0`;
+    const url = `https://www.youtube.com/embed/live_stream?channel=${ch.channelId}&autoplay=1&mute=0&playsinline=1&controls=1&rel=0`;
     const popup = window.open(
       url, 
       `WorldMonitor_${ch.id}`, 
@@ -200,7 +192,7 @@ class LivestreamManager {
     if (popup) {
       if (this.app) this.app.showToast(`Opened stream: ${ch.name}`, "bull");
     } else {
-      window.open(`https://www.youtube.com/watch?v=${ch.videoId}`, "_blank");
+      this.openYouTubeLive();
     }
   }
 
@@ -226,13 +218,13 @@ class LivestreamManager {
       if (pipLabel) pipLabel.textContent = ch.name;
       if (pipBody) {
         pipBody.innerHTML = `
-          <iframe src="https://www.youtube-nocookie.com/embed/${ch.videoId}?autoplay=1&mute=1&playsinline=1&controls=1&modestbranding=1&rel=0" 
+          <iframe src="https://www.youtube.com/embed/live_stream?channel=${ch.channelId}&autoplay=1&mute=1&playsinline=1&controls=1&rel=0" 
                   frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                   allowfullscreen style="width: 100%; height: 100%; border: none;">
           </iframe>
         `;
       }
-      if (this.app) this.app.showToast(`Detached ${ch.name} to Floating Picture-in-Picture`, "cyan");
+      if (this.app) this.app.showToast(`Detached ${ch.name} to Floating Mini-Player`, "cyan");
     } else {
       this.closePip();
     }
@@ -257,17 +249,17 @@ class LivestreamManager {
       const ch = this.channels[this.currentChannel];
       banner.innerHTML = `
         <div style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-subtle);">
-          <iframe src="https://www.youtube-nocookie.com/embed/${ch.videoId}?autoplay=1&mute=1&playsinline=1&controls=1&modestbranding=1&rel=0" 
+          <iframe src="https://www.youtube.com/embed/live_stream?channel=${ch.channelId}&autoplay=1&mute=1&playsinline=1&controls=1&rel=0" 
                   frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                   allowfullscreen style="position: absolute; top:0; left:0; width:100%; height:100%; border:none;">
           </iframe>
         </div>
       `;
-      if (toggleBtn) toggleBtn.textContent = "▲ Hide TV";
+      if (toggleBtn) toggleBtn.textContent = "Hide TV";
     } else {
       banner.style.display = "none";
       banner.innerHTML = "";
-      if (toggleBtn) toggleBtn.textContent = "▼ Watch Live TV";
+      if (toggleBtn) toggleBtn.textContent = "Watch Live TV";
     }
   }
 
@@ -275,8 +267,8 @@ class LivestreamManager {
     const iframe = document.getElementById(iframeId);
     if (!iframe || !ch) return;
     
-    // Privacy-enhanced YouTube embed with verified active live video ID: 100% login-free & accessible in Singapore
-    const url = `https://www.youtube-nocookie.com/embed/${ch.videoId}?autoplay=1&mute=1&playsinline=1&controls=1&modestbranding=1&rel=0`;
+    // Permanent YouTube Channel Live Embed: 100% Zero-Login, Autoplay & Accessible in Singapore
+    const url = `https://www.youtube.com/embed/live_stream?channel=${ch.channelId}&autoplay=1&mute=1&playsinline=1&controls=1&rel=0`;
     if (iframe.src !== url) {
       iframe.src = url;
     }

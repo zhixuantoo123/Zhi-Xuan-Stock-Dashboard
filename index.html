@@ -39,30 +39,42 @@
           <span class="market-status-dot status-open"></span>
           <span class="status-sgt">SINGAPORE (SGT)</span>
         </div>
-        <div class="mono clock-val" id="clock-sgt"><span class="skeleton-text">SYNCING</span></div>
+        <div class="mono clock-val" id="clock-sgt">--:--:--</div>
       </div>
       <div class="clock-item">
         <div class="clock-header">
           <span class="market-status-dot status-closed"></span>
           <span>NEW YORK (EST)</span>
         </div>
-        <div class="mono clock-val" id="clock-nyc"><span class="skeleton-text">SYNCING</span></div>
+        <div class="mono clock-val" id="clock-nyc">--:--:--</div>
       </div>
       <div class="clock-item">
         <div class="clock-header">
           <span class="market-status-dot status-open"></span>
           <span>LONDON (GMT)</span>
         </div>
-        <div class="mono clock-val" id="clock-lon"><span class="skeleton-text">SYNCING</span></div>
+        <div class="mono clock-val" id="clock-lon">--:--:--</div>
       </div>
       <div class="clock-item">
         <div class="clock-header">
           <span class="market-status-dot status-open"></span>
           <span>TOKYO (JST)</span>
         </div>
-        <div class="mono clock-val" id="clock-tyo"><span class="skeleton-text">SYNCING</span></div>
+        <div class="mono clock-val" id="clock-tyo">--:--:--</div>
       </div>
     </div>
+    <!-- Instant Client-Side Zero-Latency Clock Calculator -->
+    <script>
+      (function() {
+        try {
+          const fmt = (tz) => new Date().toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+          const s = document.getElementById("clock-sgt"); if (s) s.textContent = fmt("Asia/Singapore");
+          const n = document.getElementById("clock-nyc"); if (n) n.textContent = fmt("America/New_York");
+          const l = document.getElementById("clock-lon"); if (l) l.textContent = fmt("Europe/London");
+          const t = document.getElementById("clock-tyo"); if (t) t.textContent = fmt("Asia/Tokyo");
+        } catch(e){}
+      })();
+    </script>
 
     <!-- VIX Volatility & Fear Index Widget -->
     <div class="vix-header-box" id="btn-open-vix-modal" title="Click to view detailed VIX Volatility Guide & numbers">
@@ -396,9 +408,9 @@
             </div>
 
             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-              <span class="ai-quick-chip tab-btn" data-prompt="What is the short-term trend?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Trend Analysis</span>
-              <span class="ai-quick-chip tab-btn" data-prompt="Where are the best support entry levels?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Key Levels</span>
-              <span class="ai-quick-chip tab-btn" data-prompt="How do Fed rate expectations affect this asset?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Macro Impact</span>
+              <button type="button" class="ai-quick-chip tab-btn" data-prompt="What is the short-term trend?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Trend Analysis</button>
+              <button type="button" class="ai-quick-chip tab-btn" data-prompt="Where are the best support entry levels?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Key Levels</button>
+              <button type="button" class="ai-quick-chip tab-btn" data-prompt="How do Fed rate expectations affect this asset?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Macro Impact</button>
             </div>
 
             <div class="ai-ask-container">
@@ -417,15 +429,17 @@
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
               <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Net Liquidation Value</span>
               <div style="display: flex; gap: 6px; align-items: center;">
-                <span class="badge-ibkr" id="port-ibkr-count">0 IBKR</span>
-                <span class="badge-tiger" id="port-tiger-count">0 Tiger</span>
+                <span class="badge-ibkr" id="port-ibkr-count">1 IBKR (VWRA)</span>
+                <span class="badge-tiger" id="port-tiger-count">15 Tiger Positions</span>
               </div>
             </div>
-            <div class="mono" style="font-size: 22px; font-weight: 800; color: var(--text-bright); margin-top: 2px;" id="port-total-value">$0.00</div>
+            <div class="mono" style="font-size: 22px; font-weight: 800; color: var(--text-bright); margin-top: 2px;" id="port-total-value">
+              <span class="skeleton-text skeleton-price">---.--</span>
+            </div>
             <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; margin-top: 4px;">
               <span style="color: var(--text-muted);">Unrealized P&L:</span>
-              <span class="mono" id="port-total-pnl" style="font-weight: 700;">$0.00</span>
-              <span id="port-total-pnl-pct" class="mono ribbon-badge bull-bg">0.00%</span>
+              <span class="mono" id="port-total-pnl" style="font-weight: 700;"><span class="skeleton-text skeleton-badge">--</span></span>
+              <span id="port-total-pnl-pct" class="mono ribbon-badge bull-bg"><span class="skeleton-text skeleton-badge">--</span></span>
             </div>
           </div>
 
@@ -565,64 +579,46 @@
             </button>
           </div>
 
-          <!-- Quick Embedded TV Stream Toggle for News Readers -->
-          <div class="news-livestream-banner-bar" style="display: flex; justify-content: space-between; align-items: center; background: rgba(0, 240, 144, 0.06); border: 1px solid rgba(0, 240, 144, 0.2); padding: 5px 10px; border-radius: 4px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span class="live-tv-pulse-dot"></span>
-              <span style="font-size: 11px; font-weight: 700; color: var(--text-bright);">LIVE SITUATION ROOM TV FEED</span>
-            </div>
-            <button class="btn-icon" id="btn-news-tv-toggle" style="padding: 2px 8px; font-size: 10px; color: var(--color-cyan); font-weight: 700;">
-              <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-              <span>Watch Live TV</span>
-            </button>
-          </div>
-          <div id="news-tv-embedded-container" style="display: none; margin-bottom: 4px;"></div>
-
           <div id="news-feed-container" style="display: flex; flex-direction: column; gap: 8px;">
             <!-- Injected by news.js -->
           </div>
         </div>
 
         <!-- TAB: LIVE GLOBAL FINANCIAL TELEVISION & SITUATION ROOM CONTROL ROOM -->
-        <div class="hub-view-panel" id="view-livestream" style="display: none; flex-direction: column; gap: 10px; width: 100%;">
-          <!-- Control Room Header -->
-          <div class="livestream-header-box">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="live-tv-pulse-dot"></span>
-                <div>
-                  <div style="font-size: 13px; font-weight: 800; color: var(--text-bright); letter-spacing: 0.04em;">WORLD MONITOR TV</div>
-                  <div style="font-size: 9px; color: var(--color-bull); font-weight: 700;">● SATELLITE BROADCAST FEED</div>
-                </div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <button class="livestream-mode-btn active" id="btn-stream-single" title="Single Focused Channel">Single</button>
-                <button class="livestream-mode-btn" id="btn-stream-dual" title="Dual-View Control Room">Dual</button>
-                <button class="livestream-mode-btn" id="btn-stream-pip" title="Pop out into floating Picture-in-Picture window">
-                  <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"></rect><rect x="12" y="12" width="8" height="8" rx="1"></rect></svg>
-                  <span>PiP</span>
-                </button>
-                <button class="livestream-mode-btn popout-btn" id="btn-stream-popout" title="Open unblocked external viewer (Zero login required)">
-                  <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                  <span>Popout</span>
-                </button>
-                <button class="livestream-mode-btn" id="btn-stream-portal" title="Open Official Web Broadcast Portal">
-                  <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                  <span>Web</span>
-                </button>
-              </div>
+        <div class="hub-view-panel" id="view-livestream" style="display: none; flex-direction: column; gap: 8px; width: 100%;">
+          <!-- Streamlined Compact Toolbar: Channel Selector + Mode Actions + Fallback -->
+          <div class="livestream-compact-toolbar">
+            <div class="livestream-status-pill">
+              <span class="live-tv-pulse-dot"></span>
+              <span style="font-size: 11px; font-weight: 800; color: var(--text-bright); letter-spacing: 0.04em;">LIVE TV</span>
             </div>
-          </div>
 
-          <!-- Channel Switcher Ribbon (All 100% Viewable in Singapore with Zero Login) -->
-          <div class="channel-pill-bar">
-            <button class="channel-pill active" data-channel="cna"><span class="region-badge">SG</span> CNA</button>
-            <button class="channel-pill" data-channel="bloomberg"><span class="region-badge">US</span> Bloomberg</button>
-            <button class="channel-pill" data-channel="skynews"><span class="region-badge">UK</span> Sky News</button>
-            <button class="channel-pill" data-channel="france24"><span class="region-badge">FR</span> France 24</button>
-            <button class="channel-pill" data-channel="dwnews"><span class="region-badge">DE</span> DW News</button>
-            <button class="channel-pill" data-channel="aljazeera"><span class="region-badge">QA</span> Al Jazeera</button>
-            <button class="channel-pill" data-channel="euronews"><span class="region-badge">EU</span> Euronews</button>
+            <!-- Verified Permanent 24/7 Channels Viewable in Singapore (No Login Required) -->
+            <div class="channel-pill-bar">
+              <button class="channel-pill active" data-channel="cna"><span class="region-badge">SG</span> CNA</button>
+              <button class="channel-pill" data-channel="bloomberg"><span class="region-badge">US</span> Bloomberg</button>
+              <button class="channel-pill" data-channel="skynews"><span class="region-badge">UK</span> Sky News</button>
+              <button class="channel-pill" data-channel="france24"><span class="region-badge">FR</span> France 24</button>
+              <button class="channel-pill" data-channel="dwnews"><span class="region-badge">DE</span> DW News</button>
+              <button class="channel-pill" data-channel="aljazeera"><span class="region-badge">QA</span> Al Jazeera</button>
+            </div>
+
+            <div class="livestream-actions-group">
+              <button class="livestream-mode-btn active" id="btn-stream-single" title="Single Focused Channel">Single</button>
+              <button class="livestream-mode-btn" id="btn-stream-dual" title="Dual-View Control Room">Dual</button>
+              <button class="livestream-mode-btn" id="btn-stream-pip" title="Pop out into floating Picture-in-Picture window">
+                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"></rect><rect x="12" y="12" width="8" height="8" rx="1"></rect></svg>
+                <span>PiP</span>
+              </button>
+              <button class="livestream-mode-btn popout-btn" id="btn-stream-popout" title="Open unblocked external viewer">
+                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                <span>Popout</span>
+              </button>
+              <button class="livestream-mode-btn yt-fallback-btn" id="btn-stream-yt" title="Open official 24/7 stream directly on YouTube">
+                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                <span>YouTube ↗</span>
+              </button>
+            </div>
           </div>
 
           <!-- Video Player Stage (Single or Dual Control Room) -->
@@ -894,9 +890,11 @@
     <div class="floating-pip-header">
       <div style="display: flex; align-items: center; gap: 6px;">
         <span class="live-tv-pulse-dot"></span>
-        <span id="pip-channel-label" style="font-size: 11px; font-weight: 800; color: #FFF;">Bloomberg TV</span>
+        <span id="pip-channel-label" style="font-size: 11px; font-weight: 800; color: #FFF;">CNA (Channel NewsAsia)</span>
+        <span class="pip-live-tag">● LIVE</span>
       </div>
       <div style="display: flex; align-items: center; gap: 4px;">
+        <button class="pip-ctrl-btn" id="btn-pip-yt" title="Open Stream on YouTube ↗">↗</button>
         <button class="pip-ctrl-btn" id="btn-pip-dock" title="Dock back into Dashboard">⛶</button>
         <button class="pip-ctrl-btn" id="btn-pip-close" title="Close Floating PiP">✕</button>
       </div>
