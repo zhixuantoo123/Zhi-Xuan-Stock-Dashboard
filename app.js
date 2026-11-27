@@ -610,27 +610,48 @@ class TradingApp {
       item.classList.toggle("active", item.dataset.view === targetView);
     });
 
-    // 4. Toggle view panels
+    // 4. Toggle view panels with smooth fade transition
     document.querySelectorAll(".hub-view-panel").forEach(panel => {
-      panel.style.display = panel.id === targetView ? "flex" : "none";
+      const isTarget = panel.id === targetView;
+      panel.style.display = isTarget ? "flex" : "none";
+      if (isTarget) {
+        panel.classList.remove("active-panel-transition");
+        void panel.offsetWidth; // trigger reflow
+        panel.classList.add("active-panel-transition");
+      }
     });
 
-    // 5. Trigger submodules
+    // 5. Trigger submodules to ensure fresh data
     if (targetView === "view-scanner" && this.scanner) {
       this.scanner.scan(this.marketItems);
+    }
+    if (targetView === "view-portfolio" && this.portfolio) {
+      this.portfolio.render();
     }
     if (targetView === "view-livestream" && this.livestream) {
       this.livestream.render();
     }
+    if (targetView === "view-calendar" && this.calendar) {
+      this.calendar.render();
+    }
+    if (targetView === "view-news" && this.newsManager) {
+      this.newsManager.render();
+    }
+    if (targetView === "view-alerts") {
+      this.renderAlertsList();
+    }
 
-    // 6. Smooth scroll on mobile (< 768px)
-    if (window.innerWidth < 768) {
+    // 6. Seamless Viewport Transition on Mobile (< 1024px)
+    if (window.innerWidth < 1024) {
       if (targetView === "view-ai-analyst") {
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
-        const workspaceSection = document.querySelector(".hub-workspace");
+        const workspaceSection = document.getElementById("hub-workspace-section") || document.querySelector(".hub-workspace") || document.querySelector(".intelligence-hub");
         if (workspaceSection) {
-          workspaceSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          const topHeader = document.querySelector(".top-header");
+          const offset = (topHeader ? topHeader.offsetHeight : 80) + 6;
+          const y = workspaceSection.getBoundingClientRect().top + window.pageYOffset - offset;
+          window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
         }
       }
     }

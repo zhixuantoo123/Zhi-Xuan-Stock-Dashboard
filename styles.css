@@ -980,6 +980,23 @@ html, body {
   gap: 14px;
 }
 
+.hub-view-panel {
+  width: 100%;
+}
+.hub-view-panel.active-panel-transition {
+  animation: panelFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* AI ANALYST TAB */
 .ai-badge-header {
   display: flex;
@@ -2430,8 +2447,9 @@ html, body {
     border-bottom: 1px solid var(--border-subtle) !important;
   }
 
-  /* 4. Hide Desktop Left Sidebar on Mobile/Tablet */
-  .panel {
+  /* 4. Hide Desktop Left Sidebar (Watchlist) on Mobile/Tablet */
+  .watchlist-panel,
+  .panel:not(.intelligence-hub):not(.hub-workspace) {
     display: none !important;
   }
 
@@ -2503,16 +2521,29 @@ html, body {
   }
 
   /* 6. Right Panel / Workspace Views on Mobile */
-  .hub-workspace {
+  .hub-workspace,
+  .intelligence-hub {
+    display: flex !important;
+    flex-direction: column !important;
     order: 2 !important;
+    width: 100% !important;
     height: auto !important;
-    min-height: 0 !important;
-    padding: 0 0 24px 0 !important;
+    min-height: 480px !important;
+    padding: 10px 10px 48px 10px !important;
     margin: 0 !important;
     border-left: none !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    background: var(--bg-panel) !important;
+    scroll-margin-top: 86px;
   }
   .hub-tabs-header-wrap {
     display: none !important; /* Hide cluttered 7-tab scrollbar header on mobile */
+  }
+  .hub-content-area {
+    padding: 8px 2px 80px 2px !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    flex: none !important;
   }
 
   /* 7. Clean 5-Item Fixed Bottom Navigation Bar (h-14, grid-cols-5) */
