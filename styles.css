@@ -1876,16 +1876,6 @@ html, body {
   gap: 4px;
   flex-shrink: 0;
 }
-.yt-fallback-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
-}
-.yt-fallback-btn:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-strong);
-  color: var(--text-bright);
-}
 
 .livestream-header-box {
   background: #0A0E17;
