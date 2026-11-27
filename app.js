@@ -147,6 +147,7 @@ class TradingApp {
       tab.addEventListener("click", () => {
         hubTabs.forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
+        tab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
         const targetView = tab.dataset.view;
 
         document.querySelectorAll(".hub-view-panel").forEach(panel => {
@@ -161,6 +162,32 @@ class TradingApp {
         }
       });
     });
+
+    // Hub Navigation Tabs Horizontal Scroll Controls & Mouse Wheel
+    const hubTabNav = document.getElementById("hub-navigation-tabs");
+    const btnScrollLeft = document.getElementById("btn-scroll-tabs-left");
+    const btnScrollRight = document.getElementById("btn-scroll-tabs-right");
+
+    if (hubTabNav) {
+      hubTabNav.addEventListener("wheel", (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          hubTabNav.scrollLeft += e.deltaY * 1.5;
+        }
+      }, { passive: false });
+    }
+
+    if (btnScrollLeft && hubTabNav) {
+      btnScrollLeft.addEventListener("click", () => {
+        hubTabNav.scrollBy({ left: -140, behavior: "smooth" });
+      });
+    }
+
+    if (btnScrollRight && hubTabNav) {
+      btnScrollRight.addEventListener("click", () => {
+        hubTabNav.scrollBy({ left: 140, behavior: "smooth" });
+      });
+    }
 
     // Alert creation form
     const alertBtn = document.getElementById("btn-create-alert");
