@@ -77,26 +77,7 @@ class PortfolioManager {
       },
 
       // --- TIGER BROKERS (TigerTrade - 50280676) ---
-      // SINGAPORE (SGX) - Verified SG Statement Total: +6,738.82 SGD (Realized: +25.57 SGD)
-      {
-        id: "tiger-esg",
-        symbol: "ESG.SI",
-        rawSymbol: "ESG",
-        name: "Lion-OSPL Low Carbon S$",
-        broker: "Tiger",
-        shares: 100,
-        avgCost: 1.00,
-        currentPrice: 1.419,
-        change: 0.015,
-        pctChange: 1.07,
-        currency: "SGD",
-        market: "SG",
-        assetClass: "ESG / Equity Fund",
-        totalPnl: 67.47,
-        unrealizedPnl: 0.00,
-        realizedPnl: 25.57,
-        notes: "Sustainable thematic index ETF. Closed with positive realized P&L (+25.57 SGD)."
-      },
+      // SINGAPORE (SGX) - Verified SG Statement Total: +6,671.35 SGD (Realized: 0.00 SGD)
       {
         id: "tiger-es3",
         symbol: "ES3.SI",
@@ -1019,15 +1000,15 @@ class PortfolioManager {
     } else if (country === "SG") {
       curr = "SGD";
       currSymbol = "S$";
-      // Exact verified statement totals from user screenshot
-      totalPnl = 6738.82;
-      realizedPnl = 25.57;
+      // Exact verified statement totals for active SG stocks (without closed ESG)
+      totalPnl = 6671.35;
+      realizedPnl = 0.00;
     } else {
       // "All": aggregated in current display currency
       curr = this.displayCurrency;
       currSymbol = this.getCurrencySymbol(curr);
-      const totalPnlSGD = 6738.82 + this.toSGD(3183.28, "HKD") + this.toSGD(3434.65, "USD");
-      const realizedSGD = 25.57 + this.toSGD(534.31, "USD");
+      const totalPnlSGD = 6671.35 + this.toSGD(3183.28, "HKD") + this.toSGD(3434.65, "USD");
+      const realizedSGD = this.toSGD(534.31, "USD");
       totalPnl = this.fromSGD(totalPnlSGD, curr);
       realizedPnl = this.fromSGD(realizedSGD, curr);
     }

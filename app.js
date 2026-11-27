@@ -461,7 +461,6 @@ class TradingApp {
         { symbol: "O39.SI", name: "OCBC Bank", market: "SGX", price: "S$26.62" },
         { symbol: "1D0.SI", name: "Kimly Limited", market: "SGX", price: "S$0.365" },
         { symbol: "ES3.SI", name: "SS SPDR STI ETF", market: "SGX", price: "S$5.064" },
-        { symbol: "ESG.SI", name: "Lion-OSPL Low Carbon S$", market: "SGX", price: "S$1.419" },
         { symbol: "AAPL", name: "Apple Inc.", market: "NASDAQ", price: "$354.07" },
         { symbol: "GOOGL", name: "Alphabet Inc.", market: "NASDAQ", price: "$279.05" },
         { symbol: "MSFT", name: "Microsoft Corporation", market: "NASDAQ", price: "$468.20" },
