@@ -2111,6 +2111,13 @@ html, body {
   }
 
   /* 44x44px touch height on interactive triggers */
+  .pip-ctrl-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
   .btn-stats-drawer-toggle,
   .btn-manager-auth,
   .ai-ask-btn,
@@ -2119,7 +2126,6 @@ html, body {
   #btn-lock-portfolio,
   .tab-btn,
   .tf-btn,
-  .pip-ctrl-btn,
   .channel-pill,
   .livestream-mode-btn,
   .form-btn {
@@ -2255,12 +2261,18 @@ html, body {
 .player-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  aspect-ratio: 16 / 9;
   background: #000;
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid var(--border-subtle);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+@supports not (aspect-ratio: 16 / 9) {
+  .player-wrapper {
+    height: 0;
+    padding-top: 56.25%;
+  }
 }
 .livestream-iframe {
   position: absolute;
