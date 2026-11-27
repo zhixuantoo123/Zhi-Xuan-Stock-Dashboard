@@ -4,11 +4,35 @@ class PortfolioManager {
   constructor(app) {
     this.app = app;
     this.storageKey = "user_holdings_v2";
-    // Base FX Rates
-    this.fx = {
-      USDSGD: 1.2850,
-      USDHKD: 7.7850
+
+    // Base FX Rates relative to 1 SGD (Base Currency)
+    this.fxRates = {
+      SGD: 1.0000,
+      USD: 0.7749,
+      HKD: 6.0736,
+      CNH: 5.1618,
+      AUD: 1.1671,
+      NZD: 1.4157
     };
+
+    // Legacy FX mapping compatibility
+    this.fx = {
+      USDSGD: 1 / 0.7749,
+      USDHKD: 6.0736 / 0.7749
+    };
+
+    this.currencies = [
+      { code: "SGD", name: "Singapore Dollar", flag: "🇸🇬", symbol: "S$", rateDesc: "1 SGD = 1.0000 SGD" },
+      { code: "USD", name: "US Dollar", flag: "🇺🇸", symbol: "$", rateDesc: "1 SGD = 0.7749 USD" },
+      { code: "HKD", name: "Hong Kong Dollar", flag: "🇭🇰", symbol: "HK$", rateDesc: "1 SGD = 6.0736 HKD" },
+      { code: "CNH", name: "Chinese Yuan", flag: "🇨🇳", symbol: "¥", rateDesc: "1 SGD = 5.1618 CNH" },
+      { code: "AUD", name: "Australian Dollar", flag: "🇦🇺", symbol: "A$", rateDesc: "1 SGD = 1.1671 AUD" },
+      { code: "NZD", name: "New Zealand Dollar", flag: "🇳🇿", symbol: "NZ$", rateDesc: "1 SGD = 1.4157 NZD" }
+    ];
+
+    this.displayCurrency = localStorage.getItem("portfolio_currency") || "SGD";
+    this.isMasked = localStorage.getItem("portfolio_privacy_masked") === "true";
+
     this.holdings = this.loadHoldings();
     this.cashBalances = {
       tigerUSD: 181.29,
@@ -16,9 +40,11 @@ class PortfolioManager {
       ibkrUSD: 66.43,
       ibkrSGD: 60.55
     };
-    this.displayCurrency = "USD"; // USD or SGD toggle
+
     this.container = document.getElementById("portfolio-view-container");
     this.initUI();
+    this.initCurrencySelector();
+    this.updatePrivacyUI();
     this.render();
   }
 
@@ -353,6 +379,12 @@ class PortfolioManager {
       importBtn.addEventListener("click", () => fileInput.click());
       fileInput.addEventListener("change", (e) => this.handleCSVUpload(e));
     }
+
+    // Privacy Masking Toggle
+    const privacyBtn = document.getElementById("btn-portfolio-privacy");
+    if (privacyBtn) {
+      privacyBtn.addEventListener("click", () => this.togglePrivacy());
+    }
   }
 
   unlockPortfolio() {
@@ -383,20 +415,148 @@ class PortfolioManager {
     if (this.app) this.app.showToast("Portfolio locked to View-Only mode", "bull");
   }
 
-  // Convert any price/value into USD equivalent
-  toUSD(val, currency) {
+  // Interactive Multi-Currency Selector Dropdown
+  initCurrencySelector() {
+    const btn = document.getElementById("btn-currency-selector");
+    const menu = document.getElementById("currency-dropdown-menu");
+    if (!btn || !menu) return;
+
+    this.renderCurrencyDropdown();
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = menu.classList.toggle("open");
+      btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove("open");
+        btn.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  renderCurrencyDropdown() {
+    const menu = document.getElementById("currency-dropdown-menu");
+    const activeFlag = document.getElementById("curr-active-flag");
+    const activeCode = document.getElementById("curr-active-code");
+    if (!menu) return;
+
+    const activeCurr = this.currencies.find(c => c.code === this.displayCurrency) || this.currencies[0];
+    if (activeFlag) activeFlag.textContent = activeCurr.flag;
+    if (activeCode) activeCode.textContent = activeCurr.code;
+
+    menu.innerHTML = this.currencies.map(c => {
+      const isSel = c.code === this.displayCurrency;
+      return `
+        <div class="curr-dropdown-row ${isSel ? 'active' : ''}" data-code="${c.code}">
+          <div class="curr-dropdown-left">
+            <span class="curr-dropdown-flag">${c.flag}</span>
+            <div class="curr-dropdown-meta">
+              <span class="curr-dropdown-code mono">${c.code}</span>
+              <span class="curr-dropdown-desc">${c.rateDesc}</span>
+            </div>
+          </div>
+          <span class="curr-dropdown-check">${isSel ? '✓' : ''}</span>
+        </div>
+      `;
+    }).join("");
+
+    menu.querySelectorAll(".curr-dropdown-row").forEach(row => {
+      row.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const code = row.dataset.code;
+        if (code && this.currencies.some(c => c.code === code)) {
+          this.setCurrency(code);
+          menu.classList.remove("open");
+          const btn = document.getElementById("btn-currency-selector");
+          if (btn) btn.setAttribute("aria-expanded", "false");
+        }
+      });
+    });
+  }
+
+  setCurrency(code) {
+    this.displayCurrency = code;
+    localStorage.setItem("portfolio_currency", code);
+    this.renderCurrencyDropdown();
+    this.render();
+    if (this.app) {
+      this.app.showToast(`Portfolio converted to ${code}`, "cyan");
+    }
+  }
+
+  // Privacy Masking (••••••)
+  togglePrivacy() {
+    this.isMasked = !this.isMasked;
+    localStorage.setItem("portfolio_privacy_masked", this.isMasked ? "true" : "false");
+    this.updatePrivacyUI();
+    this.render();
+    if (this.app) {
+      this.app.showToast(this.isMasked ? "Portfolio privacy mode enabled (Balances masked)" : "Portfolio balances revealed", "bull");
+    }
+  }
+
+  updatePrivacyUI() {
+    const openIcon = document.getElementById("privacy-icon-open");
+    const closedIcon = document.getElementById("privacy-icon-closed");
+    const btn = document.getElementById("btn-portfolio-privacy");
+    if (openIcon && closedIcon) {
+      openIcon.style.display = this.isMasked ? "none" : "block";
+      closedIcon.style.display = this.isMasked ? "block" : "none";
+    }
+    if (btn) {
+      btn.classList.toggle("active", this.isMasked);
+      btn.title = this.isMasked ? "Private Mode Active (Click to Reveal Balances)" : "Click to Mask Private Balances (••••••)";
+    }
+  }
+
+  // Base converter: from holding currency to SGD base
+  toSGD(val, currency) {
     if (!val) return 0;
-    if (currency === "SGD") return val / this.fx.USDSGD;
-    if (currency === "HKD") return val / this.fx.USDHKD;
+    const c = (currency || "USD").toUpperCase();
+    if (c === "SGD") return val;
+    const rate = this.fxRates[c];
+    if (rate && rate > 0) return val / rate;
+    if (c === "USD") return val / 0.7749;
+    if (c === "HKD") return val / 6.0736;
+    if (c === "CNH") return val / 5.1618;
     return val;
   }
 
-  // Convert any price/value into SGD equivalent
-  toSGD(val, currency) {
-    if (!val) return 0;
-    if (currency === "USD") return val * this.fx.USDSGD;
-    if (currency === "HKD") return (val / this.fx.USDHKD) * this.fx.USDSGD;
-    return val;
+  // Base converter: from SGD base to target currency
+  fromSGD(valSGD, targetCurrency) {
+    if (!valSGD) return 0;
+    const t = (targetCurrency || this.displayCurrency || "SGD").toUpperCase();
+    if (t === "SGD") return valSGD;
+    const rate = this.fxRates[t] || 1;
+    return valSGD * rate;
+  }
+
+  // Convert to USD (for backward compatibility)
+  toUSD(val, currency) {
+    const inSGD = this.toSGD(val, currency);
+    return inSGD * this.fxRates.USD;
+  }
+
+  // Convert directly between any two currencies
+  convertCurrency(val, fromCurrency, toCurrency) {
+    const inSGD = this.toSGD(val, fromCurrency);
+    return this.fromSGD(inSGD, toCurrency);
+  }
+
+  getCurrencySymbol(code = this.displayCurrency) {
+    const found = this.currencies.find(c => c.code === code);
+    return found ? found.symbol : "$";
+  }
+
+  formatVal(num, code = this.displayCurrency, showSign = false) {
+    if (this.isMasked) return "••••••";
+    const sym = this.getCurrencySymbol(code);
+    const abs = Math.abs(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const sign = num < 0 ? '-' : (showSign && num > 0 ? '+' : '');
+    return `${sign}${sym}${abs}`;
   }
 
   // UNBIASED ELITE TRADER DECISION ENGINE
@@ -609,57 +769,103 @@ class PortfolioManager {
 
     listContainer.innerHTML = "";
 
-    let totalValUSD = 0;
-    let totalCostUSD = 0;
+    let totalHoldingsValSGD = 0;
+    let totalHoldingsCostSGD = 0;
+    let totalDayPnlSGD = 0;
     let ibkrPositionsCount = 0;
     let tigerPositionsCount = 0;
 
-    // Calculate aggregated portfolio totals in USD
+    // Calculate aggregated portfolio totals in base SGD
     this.holdings.forEach(pos => {
       const curPrice = pos.currentPrice || pos.avgCost;
-      const posVal = curPrice * pos.shares;
-      const posCost = pos.avgCost * pos.shares;
+      const posValLocal = curPrice * pos.shares;
+      const posCostLocal = pos.avgCost * pos.shares;
+      const dayPnlLocal = (pos.change || 0) * pos.shares;
 
-      const valUSD = this.toUSD(posVal, pos.currency);
-      const costUSD = this.toUSD(posCost, pos.currency);
+      const posValSGD = this.toSGD(posValLocal, pos.currency);
+      const posCostSGD = this.toSGD(posCostLocal, pos.currency);
+      const dayPnlSGD = this.toSGD(dayPnlLocal, pos.currency);
 
-      totalValUSD += valUSD;
-      totalCostUSD += costUSD;
+      totalHoldingsValSGD += posValSGD;
+      totalHoldingsCostSGD += posCostSGD;
+      totalDayPnlSGD += dayPnlSGD;
 
       if (pos.broker === "IBKR") ibkrPositionsCount++;
       else if (pos.broker === "Tiger") tigerPositionsCount++;
     });
 
-    // Add cash balances (in USD)
-    const totalCashUSD = this.cashBalances.tigerUSD + 
-                         (this.cashBalances.tigerSGD / this.fx.USDSGD) + 
-                         this.cashBalances.ibkrUSD + 
-                         (this.cashBalances.ibkrSGD / this.fx.USDSGD);
+    // Add cash balances (converted to SGD base)
+    const totalCashSGD = this.cashBalances.tigerSGD + 
+                         this.cashBalances.ibkrSGD + 
+                         this.toSGD(this.cashBalances.tigerUSD + this.cashBalances.ibkrUSD, "USD");
 
-    const netLiquidationUSD = totalValUSD + totalCashUSD;
-    const netPnlUSD = totalValUSD - totalCostUSD;
-    const netPnlPct = totalCostUSD > 0 ? (netPnlUSD / totalCostUSD) * 100 : 0;
+    const totalAssetsSGD = totalHoldingsValSGD + totalCashSGD;
+    const totalCostSGD = totalHoldingsCostSGD + totalCashSGD;
+    const netPnlSGD = totalHoldingsValSGD - totalHoldingsCostSGD;
+    const netPnlPct = totalHoldingsCostSGD > 0 ? (netPnlSGD / totalCostSGD) * 100 : 0;
 
-    // Update Header Metric Cards
+    // Daily P&L calculations
+    const dailyPnlSGD = totalDayPnlSGD;
+    const prevAssetsSGD = totalAssetsSGD - dailyPnlSGD;
+    const dailyPnlPct = prevAssetsSGD > 0 ? (dailyPnlSGD / prevAssetsSGD) * 100 : 0;
+
+    // Convert to currently selected display currency
+    const totalAssetsDisp = this.fromSGD(totalAssetsSGD, this.displayCurrency);
+    const dailyPnlDisp = this.fromSGD(dailyPnlSGD, this.displayCurrency);
+    const netPnlDisp = this.fromSGD(netPnlSGD, this.displayCurrency);
+
+    // 1. UPDATE PERSISTENT SUMMARY BAR
+    const summaryTotalEl = document.getElementById("summary-total-assets");
+    const summaryPnlEl = document.getElementById("summary-daily-pnl");
+    if (summaryTotalEl) {
+      summaryTotalEl.textContent = this.formatVal(totalAssetsDisp, this.displayCurrency);
+    }
+    if (summaryPnlEl) {
+      if (this.isMasked) {
+        summaryPnlEl.textContent = "••••••";
+        summaryPnlEl.className = "summary-pnl mono";
+      } else {
+        const sign = dailyPnlDisp >= 0 ? '+' : '';
+        summaryPnlEl.textContent = `${sign}${this.formatVal(dailyPnlDisp, this.displayCurrency)} (${sign}${dailyPnlPct.toFixed(2)}%)`;
+        summaryPnlEl.className = `summary-pnl mono ${dailyPnlDisp >= 0 ? 'bull' : 'bear'}`;
+      }
+    }
+
+    // 2. UPDATE HEADER METRIC CARDS
     if (totalValEl) {
-      totalValEl.innerHTML = `
-        <div style="display: flex; align-items: baseline; gap: 8px;">
-          <span>$${netLiquidationUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span style="font-size: 13px; color: var(--text-muted);">USD</span></span>
-          <span style="font-size: 13px; color: var(--color-cyan); font-weight: 600;">(≈ S$${(netLiquidationUSD * this.fx.USDSGD).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SGD)</span>
-        </div>
-      `;
+      if (this.isMasked) {
+        totalValEl.innerHTML = `<span class="mono" style="font-size: 22px; font-weight: 800; color: var(--text-bright);">••••••</span>`;
+      } else {
+        const secondaryCode = this.displayCurrency === "SGD" ? "USD" : "SGD";
+        const secondaryVal = this.displayCurrency === "SGD" ? this.fromSGD(totalAssetsSGD, "USD") : totalAssetsSGD;
+
+        totalValEl.innerHTML = `
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span>${this.formatVal(totalAssetsDisp, this.displayCurrency)} <span style="font-size: 13px; color: var(--text-muted);">${this.displayCurrency}</span></span>
+            <span style="font-size: 13px; color: var(--color-cyan); font-weight: 600;">(≈ ${this.formatVal(secondaryVal, secondaryCode)} ${secondaryCode})</span>
+          </div>
+        `;
+      }
     }
 
     if (totalPnlEl) {
-      const sign = netPnlUSD >= 0 ? '+' : '';
-      totalPnlEl.textContent = `${sign}$${netPnlUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD (${sign}S$${(netPnlUSD * this.fx.USDSGD).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SGD)`;
-      totalPnlEl.className = `mono ${netPnlUSD >= 0 ? 'bull' : 'bear'}`;
+      if (this.isMasked) {
+        totalPnlEl.textContent = "••••••";
+      } else {
+        const sign = netPnlDisp >= 0 ? '+' : '';
+        totalPnlEl.textContent = `${sign}${this.formatVal(netPnlDisp, this.displayCurrency)} ${this.displayCurrency}`;
+        totalPnlEl.className = `mono ${netPnlDisp >= 0 ? 'bull' : 'bear'}`;
+      }
     }
 
     if (totalPnlPctEl) {
-      const sign = netPnlPct >= 0 ? '+' : '';
-      totalPnlPctEl.textContent = `${sign}${netPnlPct.toFixed(2)}% Overall Gain`;
-      totalPnlPctEl.className = `mono ${netPnlPct >= 0 ? 'bull-bg' : 'bear-bg'} ribbon-badge`;
+      if (this.isMasked) {
+        totalPnlPctEl.textContent = "••••••";
+      } else {
+        const sign = netPnlPct >= 0 ? '+' : '';
+        totalPnlPctEl.textContent = `${sign}${netPnlPct.toFixed(2)}% Overall Gain`;
+        totalPnlPctEl.className = `mono ${netPnlPct >= 0 ? 'bull-bg' : 'bear-bg'} ribbon-badge`;
+      }
     }
 
     if (ibkrCountEl) ibkrCountEl.textContent = `${ibkrPositionsCount} IBKR (VWRA)`;
@@ -691,9 +897,10 @@ class PortfolioManager {
       const fillWidth = isProfit ? (gaugeMarkerPos - 50) : (50 - gaugeMarkerPos);
 
       const posValUSD = this.toUSD(posValLocal, pos.currency);
-      const weightPct = totalValUSD > 0 ? (posValUSD / totalValUSD) * 100 : 0;
+      const totalPortfolioUSD = this.fromSGD(totalAssetsSGD, "USD");
+      const weightPct = totalAssetsSGD > 0 ? (posValSGD / totalAssetsSGD) * 100 : 0;
 
-      const verdict = this.generateTraderVerdict(pos, totalValUSD);
+      const verdict = this.generateTraderVerdict(pos, totalPortfolioUSD);
       const isIbkr = pos.broker === "IBKR";
 
       const currSymbol = pos.currency === "SGD" ? "S$" : pos.currency === "HKD" ? "HK$" : "$";
@@ -728,10 +935,10 @@ class PortfolioManager {
               </button>
             </div>
             <div class="mono" style="font-size: 14px; font-weight: 800;">
-              ${currSymbol}${posValLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ${this.isMasked ? '••••••' : `${currSymbol}${posValLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             </div>
             <div class="mono ${pnlLocal >= 0 ? 'bull' : 'bear'}" style="font-size: 11px; font-weight: 700;">
-              ${pnlLocal >= 0 ? '+' : ''}${currSymbol}${pnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pnlLocal >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)
+              ${this.isMasked ? '••••••' : `${pnlLocal >= 0 ? '+' : ''}${currSymbol}${pnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pnlLocal >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)`}
             </div>
           </div>
         </div>
@@ -770,11 +977,11 @@ class PortfolioManager {
           <div class="institutional-pnl-substrip mono">
             <div class="pnl-sub-box">
               <span class="sub-lbl">TOTAL POSITION P&L</span>
-              <span class="sub-val ${isProfit ? 'bull' : 'bear'}">${isProfit ? '+' : ''}${currSymbol}${pnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)</span>
+              <span class="sub-val ${isProfit ? 'bull' : 'bear'}">${this.isMasked ? '••••••' : `${isProfit ? '+' : ''}${currSymbol}${pnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)`}</span>
             </div>
             <div class="pnl-sub-box">
               <span class="sub-lbl">TODAY'S DAY P&L</span>
-              <span class="sub-val ${dayPnlLocal >= 0 ? 'bull' : 'bear'}">${dayPnlLocal >= 0 ? '+' : ''}${currSymbol}${dayPnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${dayPct >= 0 ? '+' : ''}${dayPct.toFixed(2)}%)</span>
+              <span class="sub-val ${dayPnlLocal >= 0 ? 'bull' : 'bear'}">${this.isMasked ? '••••••' : `${dayPnlLocal >= 0 ? '+' : ''}${currSymbol}${dayPnlLocal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${dayPct >= 0 ? '+' : ''}${dayPct.toFixed(2)}%)`}</span>
             </div>
             <div class="pnl-sub-box">
               <span class="sub-lbl">PORTFOLIO WEIGHT</span>

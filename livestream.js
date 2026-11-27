@@ -88,33 +88,12 @@ class LivestreamManager {
       });
     });
 
-    // View mode toggles
+    // View mode toggles (Single & Dual only)
     const singleBtn = document.getElementById("btn-stream-single");
     const dualBtn = document.getElementById("btn-stream-dual");
-    const pipBtn = document.getElementById("btn-stream-pip");
-    const popoutBtn = document.getElementById("btn-stream-popout");
-    const portalBtn = document.getElementById("btn-stream-portal");
-    const ytBtn = document.getElementById("btn-stream-yt");
 
     if (singleBtn) singleBtn.addEventListener("click", () => this.setMode("single"));
     if (dualBtn) dualBtn.addEventListener("click", () => this.setMode("dual"));
-    if (pipBtn) pipBtn.addEventListener("click", () => this.togglePipMode());
-    if (popoutBtn) popoutBtn.addEventListener("click", () => this.openCleanPopout());
-    if (portalBtn) portalBtn.addEventListener("click", () => this.openDirectPortal());
-    if (ytBtn) ytBtn.addEventListener("click", () => this.openYouTubeLive());
-
-    // PiP window buttons
-    const closePipBtn = document.getElementById("btn-pip-close");
-    const dockPipBtn = document.getElementById("btn-pip-dock");
-    const ytPipBtn = document.getElementById("btn-pip-yt");
-    if (closePipBtn) closePipBtn.addEventListener("click", () => this.closePip());
-    if (dockPipBtn) {
-      dockPipBtn.addEventListener("click", () => {
-        this.closePip();
-        this.toggleHubView();
-      });
-    }
-    if (ytPipBtn) ytPipBtn.addEventListener("click", () => this.openYouTubeLive());
 
     // News tab quick-toggle livestream banner
     const newsExpandBtn = document.getElementById("btn-news-tv-toggle");
@@ -170,73 +149,7 @@ class LivestreamManager {
     this.render();
   }
 
-  // Open on YouTube Live fallback
-  openYouTubeLive() {
-    const ch = this.channels[this.currentChannel];
-    if (!ch) return;
-    const url = ch.youtubeLiveUrl || `https://www.youtube.com/channel/${ch.channelId}/live`;
-    window.open(url, "_blank");
-    if (this.app) this.app.showToast(`Opened ${ch.name} on YouTube ↗`, "bull");
-  }
 
-  // Standalone Popout Window - 100% Zero Login, Fullscreen HD
-  openCleanPopout() {
-    const ch = this.channels[this.currentChannel];
-    if (!ch) return;
-    const url = `https://www.youtube.com/embed/live_stream?channel=${ch.channelId}&autoplay=1&mute=0&playsinline=1&controls=1&rel=0`;
-    const popup = window.open(
-      url, 
-      `WorldMonitor_${ch.id}`, 
-      "width=1040,height=600,top=100,left=100,menubar=no,toolbar=no,location=no,status=no,resizable=yes"
-    );
-    if (popup) {
-      if (this.app) this.app.showToast(`Opened stream: ${ch.name}`, "bull");
-    } else {
-      this.openYouTubeLive();
-    }
-  }
-
-  // Opens official direct channel web portal (e.g. CNA Singapore)
-  openDirectPortal() {
-    const ch = this.channels[this.currentChannel];
-    if (ch && ch.directUrl) {
-      window.open(ch.directUrl, "_blank");
-    }
-  }
-
-  togglePipMode() {
-    this.isPipActive = !this.isPipActive;
-    const pipContainer = document.getElementById("floating-pip-container");
-    const pipBody = document.getElementById("floating-pip-body");
-    const pipLabel = document.getElementById("pip-channel-label");
-    const ch = this.channels[this.currentChannel];
-
-    if (!pipContainer) return;
-
-    if (this.isPipActive) {
-      pipContainer.style.display = "flex";
-      if (pipLabel) pipLabel.textContent = ch.name;
-      if (pipBody) {
-        pipBody.innerHTML = `
-          <iframe src="https://www.youtube.com/embed/live_stream?channel=${ch.channelId}&autoplay=1&mute=1&playsinline=1&controls=1&rel=0" 
-                  frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                  allowfullscreen style="width: 100%; height: 100%; border: none;">
-          </iframe>
-        `;
-      }
-      if (this.app) this.app.showToast(`Detached ${ch.name} to Floating Mini-Player`, "cyan");
-    } else {
-      this.closePip();
-    }
-  }
-
-  closePip() {
-    this.isPipActive = false;
-    const pipContainer = document.getElementById("floating-pip-container");
-    const pipBody = document.getElementById("floating-pip-body");
-    if (pipContainer) pipContainer.style.display = "none";
-    if (pipBody) pipBody.innerHTML = "";
-  }
 
   toggleNewsTvBanner() {
     const banner = document.getElementById("news-tv-embedded-container");

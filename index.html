@@ -431,6 +431,35 @@
 
         <!-- TAB: PORTFOLIO HOLDINGS (IBKR & TIGER) -->
         <div class="hub-view-panel" id="view-portfolio" style="display: none; flex-direction: column; gap: 12px; width: 100%;">
+          <!-- PERSISTENT BROKERAGE PORTFOLIO SUMMARY BAR & MULTI-CURRENCY CONVERTER -->
+          <div class="portfolio-summary-bar" id="portfolio-summary-bar">
+            <div class="summary-bar-left">
+              <button class="btn-privacy-toggle" id="btn-portfolio-privacy" title="Toggle Private Balance Masking (••••••)" aria-label="Toggle Portfolio Privacy">
+                <svg id="privacy-icon-open" class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg id="privacy-icon-closed" class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+              <div class="summary-asset-box">
+                <span class="summary-label">Total Assets:</span>
+                <span class="summary-val mono" id="summary-total-assets"><span class="skeleton-text skeleton-price">---.--</span></span>
+              </div>
+              <div class="currency-dropdown-wrap" id="currency-dropdown-wrap">
+                <button class="currency-pill-btn" id="btn-currency-selector" title="Select Valuation Currency" aria-haspopup="true" aria-expanded="false">
+                  <span id="curr-active-flag">🇸🇬</span>
+                  <span id="curr-active-code" class="mono">SGD</span>
+                  <svg class="icon-svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="currency-dropdown-menu" id="currency-dropdown-menu">
+                  <!-- Dynamically rendered by portfolio.js -->
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-bar-right">
+              <span class="summary-label">Daily P&L:</span>
+              <span class="summary-pnl mono bull" id="summary-daily-pnl"><span class="skeleton-text skeleton-badge">--</span></span>
+            </div>
+          </div>
+
           <!-- Portfolio Metrics Summary -->
           <div class="portfolio-metric-card">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
@@ -613,18 +642,6 @@
             <div class="livestream-actions-group">
               <button class="livestream-mode-btn active" id="btn-stream-single" title="Single Focused Channel">Single</button>
               <button class="livestream-mode-btn" id="btn-stream-dual" title="Dual-View Control Room">Dual</button>
-              <button class="livestream-mode-btn" id="btn-stream-pip" title="Pop out into floating Picture-in-Picture window">
-                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"></rect><rect x="12" y="12" width="8" height="8" rx="1"></rect></svg>
-                <span>PiP</span>
-              </button>
-              <button class="livestream-mode-btn popout-btn" id="btn-stream-popout" title="Open unblocked external viewer">
-                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                <span>Popout</span>
-              </button>
-              <button class="livestream-mode-btn yt-fallback-btn" id="btn-stream-yt" title="Open official 24/7 stream directly on YouTube">
-                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                <span>YouTube ↗</span>
-              </button>
             </div>
           </div>
 
@@ -892,24 +909,7 @@
     </div>
   </div>
 
-  <!-- FLOATING PICTURE-IN-PICTURE (PiP) SITUATION ROOM PLAYER -->
-  <div class="floating-pip-container" id="floating-pip-container" style="display: none;">
-    <div class="floating-pip-header">
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <span class="live-tv-pulse-dot"></span>
-        <span id="pip-channel-label" style="font-size: 11px; font-weight: 800; color: #FFF;">CNA (Channel NewsAsia)</span>
-        <span class="pip-live-tag">● LIVE</span>
-      </div>
-      <div style="display: flex; align-items: center; gap: 4px;">
-        <button class="pip-ctrl-btn" id="btn-pip-yt" title="Open Stream on YouTube ↗">↗</button>
-        <button class="pip-ctrl-btn" id="btn-pip-dock" title="Dock back into Dashboard">⛶</button>
-        <button class="pip-ctrl-btn" id="btn-pip-close" title="Close Floating PiP">✕</button>
-      </div>
-    </div>
-    <div class="floating-pip-body" id="floating-pip-body">
-      <!-- Injected by livestream.js -->
-    </div>
-  </div>
+
 
   <!-- MOBILE BOTTOM NAVIGATION BAR (md:hidden, 5-items: Chart/AI, Portfolio, Scanner, Live TV, More) -->
   <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
