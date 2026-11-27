@@ -1877,14 +1877,14 @@ html, body {
   flex-shrink: 0;
 }
 .yt-fallback-btn {
-  background: rgba(255, 56, 92, 0.1) !important;
-  color: #FF4757 !important;
-  border-color: rgba(255, 56, 92, 0.35) !important;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
 }
 .yt-fallback-btn:hover {
-  background: rgba(255, 56, 92, 0.25) !important;
-  border-color: #FF4757 !important;
-  box-shadow: 0 0 8px rgba(255, 56, 92, 0.4);
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
+  color: var(--text-bright);
 }
 
 .livestream-header-box {
