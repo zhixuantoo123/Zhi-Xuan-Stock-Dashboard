@@ -818,11 +818,16 @@ class PortfolioManager {
         });
       }
 
-      card.addEventListener("click", () => {
-        if (this.app) {
-          this.app.selectAsset(pos.symbol);
-          this.highlightActiveHolding(pos.symbol);
-          this.app.showToast(`Viewing ${pos.symbol} (${pos.name}) live chart`, "bull");
+      card.addEventListener("click", (e) => {
+        if (e.target.closest("button")) return;
+        if (window.innerWidth < 768) {
+          card.classList.toggle("is-expanded");
+        } else {
+          if (this.app) {
+            this.app.selectAsset(pos.symbol);
+            this.highlightActiveHolding(pos.symbol);
+            this.app.showToast(`Viewing ${pos.symbol} (${pos.name}) live chart`, "bull");
+          }
         }
       });
 

@@ -160,6 +160,14 @@ class TradingApp {
         if (targetView === "view-livestream" && this.livestream) {
           this.livestream.render();
         }
+
+        // On mobile portrait, scroll smoothly to active view panel
+        if (window.innerWidth < 768) {
+          const workspaceSection = document.querySelector(".hub-workspace");
+          if (workspaceSection) {
+            workspaceSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
       });
     });
 
@@ -252,10 +260,15 @@ class TradingApp {
     // Collapsible Secondary Metrics Drawer
     const statsToggle = document.getElementById("btn-toggle-stats-drawer");
     const statsStrip = document.getElementById("chart-stats-strip");
+    const statsLabel = document.getElementById("btn-stats-drawer-label");
     if (statsToggle && statsStrip) {
       statsToggle.addEventListener("click", () => {
-        statsStrip.classList.toggle("collapsed");
-        statsToggle.classList.toggle("active");
+        const isOpen = statsStrip.classList.toggle("is-open");
+        statsStrip.classList.toggle("collapsed", !isOpen);
+        statsToggle.classList.toggle("active", isOpen);
+        if (statsLabel) {
+          statsLabel.textContent = isOpen ? "Hide Metrics ▴" : "Show Metrics ▾";
+        }
       });
     }
 

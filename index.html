@@ -178,7 +178,7 @@
         <!-- Secondary Metrics Drawer Toggle -->
         <button class="btn-stats-drawer-toggle" id="btn-toggle-stats-drawer" title="Toggle detailed asset metrics">
           <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          <span>Metrics</span>
+          <span id="btn-stats-drawer-label">Show Metrics ▾</span>
         </button>
       </div>
 
@@ -191,8 +191,8 @@
         <div class="stat-pill"><span class="stat-label">52W HIGH:</span> <span class="stat-val" id="stat-52w-high"><span class="skeleton-text">--</span></span></div>
         <div class="stat-pill"><span class="stat-label">52W LOW:</span> <span class="stat-val" id="stat-52w-low"><span class="skeleton-text">--</span></span></div>
         <div class="stat-pill"><span class="stat-label">VOL:</span> <span class="stat-val" id="stat-vol"><span class="skeleton-text">--</span></span></div>
-        <div class="stat-pill"><span class="stat-label">RSI(14):</span> <span class="stat-val cyan" id="rsi-val-badge">--</span></div>
-        <div class="stat-pill"><span class="stat-label">MACD:</span> <span class="stat-val" id="macd-val-badge">--</span></div>
+        <div class="stat-pill"><span class="stat-label">RSI(14):</span> <span class="stat-val cyan" id="rsi-val-badge"><span class="skeleton-text">--</span></span></div>
+        <div class="stat-pill"><span class="stat-label">MACD:</span> <span class="stat-val" id="macd-val-badge"><span class="skeleton-text">--</span></span></div>
       </div>
 
       <!-- Institutional Portfolio Position Live Ribbon (Shown when charting owned asset) -->
@@ -243,11 +243,11 @@
         <!-- OHLC Tooltip Legend -->
         <div class="chart-legend-overlay mono">
           <div class="legend-ohlc">
-            <span style="color: var(--text-muted);">O:</span> <span id="leg-open">--</span>
-            <span style="color: var(--text-muted);">H:</span> <span id="leg-high">--</span>
-            <span style="color: var(--text-muted);">L:</span> <span id="leg-low">--</span>
-            <span style="color: var(--text-muted);">C:</span> <span id="leg-close">--</span>
-            <span style="color: var(--text-muted);">V:</span> <span id="leg-vol">--</span>
+            <span style="color: var(--text-muted);">O:</span> <span id="leg-open"><span class="skeleton-text skeleton-lvl">--</span></span>
+            <span style="color: var(--text-muted);">H:</span> <span id="leg-high"><span class="skeleton-text skeleton-lvl">--</span></span>
+            <span style="color: var(--text-muted);">L:</span> <span id="leg-low"><span class="skeleton-text skeleton-lvl">--</span></span>
+            <span style="color: var(--text-muted);">C:</span> <span id="leg-close"><span class="skeleton-text skeleton-lvl">--</span></span>
+            <span style="color: var(--text-muted);">V:</span> <span id="leg-vol"><span class="skeleton-text skeleton-lvl">--</span></span>
           </div>
         </div>
         <div id="tv-chart"></div>
@@ -606,6 +606,18 @@
             <div class="livestream-actions-group">
               <button class="livestream-mode-btn active" id="btn-stream-single" title="Single Focused Channel">Single</button>
               <button class="livestream-mode-btn" id="btn-stream-dual" title="Dual-View Control Room">Dual</button>
+              <button class="livestream-mode-btn" id="btn-stream-pip" title="Pop out into floating Picture-in-Picture window">
+                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"></rect><rect x="12" y="12" width="8" height="8" rx="1"></rect></svg>
+                <span>PiP</span>
+              </button>
+              <button class="livestream-mode-btn popout-btn" id="btn-stream-popout" title="Open unblocked external viewer">
+                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                <span>Popout</span>
+              </button>
+              <button class="livestream-mode-btn yt-fallback-btn" id="btn-stream-yt" title="Open official 24/7 stream directly on YouTube">
+                <svg class="icon-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                <span>YouTube ↗</span>
+              </button>
             </div>
           </div>
 

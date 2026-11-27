@@ -1812,29 +1812,333 @@ html, body {
   letter-spacing: 0.05em;
 }
 
-/* RESPONSIVE DESIGN */
-@media (max-width: 1200px) {
+/* DUAL-VIEWPORT RESPONSIVE ARCHITECTURE */
+
+/* DESKTOP / LAPTOP (>= 1024px): Multi-pane viewport grid */
+@media (min-width: 1024px) {
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
   .dashboard-workspace {
-    grid-template-columns: 260px 1fr 320px;
+    display: grid;
+    grid-template-columns: 270px 1fr 390px;
+    height: calc(100vh - 42px - 28px);
+    overflow: hidden;
+  }
+  .panel {
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-subtle);
+  }
+  .chart-workspace {
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .hub-workspace {
+    height: 100%;
+    overflow-y: auto;
+    border-left: 1px solid var(--border-subtle);
+  }
+  #chart-stats-strip {
+    display: flex !important;
+  }
+  #chart-stats-strip.collapsed {
+    display: none !important;
   }
 }
-@media (max-width: 992px) {
+
+/* INTERMEDIATE / TABLET (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
   .dashboard-workspace {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
+    display: grid;
+    grid-template-columns: 240px 1fr;
     height: auto;
     overflow-y: auto;
   }
+  .hub-workspace {
+    grid-column: span 2;
+  }
+}
+
+/* MOBILE PORTRAIT (< 768px): Thumb-friendly single-column layout */
+@media (max-width: 768px) {
+  body {
+    height: auto;
+    overflow-y: auto;
+  }
+  .dashboard-workspace {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    padding-bottom: 76px; /* space for fixed bottom nav */
+    overflow-y: visible;
+  }
+
+  /* Sticky Compact Top Bar */
+  .top-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+    padding: 6px 10px;
+    background: #060910;
+  }
+  #btn-toggle-fullscreen {
+    display: none !important;
+  }
+
+  /* Single-row horizontally scrollable world clocks ticker strip right below header */
+  .market-clocks {
+    order: 10;
+    width: 100%;
+    display: flex !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    padding: 5px 8px !important;
+    margin-top: 4px;
+    background: #080C14;
+    border-top: 1px solid var(--border-subtle);
+    gap: 12px;
+  }
+  .market-clocks::-webkit-scrollbar {
+    display: none;
+  }
+  .clock-item {
+    flex-shrink: 0;
+    padding: 0 4px;
+  }
+
+  /* Compact Watchlist: horizontal swipeable ticker pill bar directly above the chart */
   .panel {
     border-right: none;
     border-bottom: 1px solid var(--border-subtle);
-    max-height: 400px;
+    max-height: none;
+    padding: 0;
+    background: #070B14;
+    order: 1;
   }
-  .chart-workspace {
-    height: 520px;
+  .panel-header,
+  .watchlist-controls {
+    display: none !important;
   }
-  .market-clocks {
+  .watchlist-items {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    padding: 6px 8px !important;
+    gap: 6px !important;
+    max-height: none !important;
+  }
+  .watchlist-items::-webkit-scrollbar {
     display: none;
+  }
+  .asset-row {
+    flex-shrink: 0;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    background: #0D1321 !important;
+    border: 1px solid #1C273D !important;
+    margin: 0 !important;
+  }
+  .asset-row.active {
+    background: rgba(0, 210, 255, 0.15) !important;
+    border-color: var(--color-cyan) !important;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.25) !important;
+  }
+  .asset-row .asset-name,
+  .asset-row .asset-badge-live,
+  .asset-row .asset-badge-delayed,
+  .asset-row .range-mini-container {
+    display: none !important;
+  }
+  .asset-row .asset-left {
+    display: flex;
+    align-items: center;
+  }
+  .asset-row .asset-symbol {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    color: var(--text-bright) !important;
+  }
+  .asset-row .asset-price {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+  }
+  .asset-row .asset-change-pill {
+    font-size: 9px !important;
+    padding: 1px 4px !important;
+    border-radius: 3px !important;
+  }
+
+  /* Center Panel / Chart on mobile: 42vh height & scrollable strips */
+  .chart-workspace {
+    order: 2;
+    height: auto;
+  }
+  .chart-canvas-container {
+    height: 42vh !important;
+    min-height: 280px;
+  }
+  .chart-controls-bar {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    gap: 8px;
+  }
+  .chart-controls-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .timeframe-toolbar,
+  .chart-type-toolbar,
+  .indicators-toolbar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+
+  /* Secondary stats strip collapsed by default behind accordion toggle on mobile */
+  #chart-stats-strip {
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px;
+    background: #090E18;
+    border-bottom: 1px solid var(--border-subtle);
+    white-space: normal;
+  }
+  #chart-stats-strip.is-open {
+    display: flex !important;
+  }
+
+  /* Right Panel / Hub Workspace on mobile */
+  .hub-workspace {
+    order: 3;
+    height: auto;
+    padding-bottom: 24px;
+  }
+
+  /* Fixed Bottom Navigation Bar for one-handed thumb navigation */
+  .tabs-scroll-arrow {
+    display: none !important;
+  }
+  .hub-tabs-header-wrap {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 58px !important;
+    background: #070B13 !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    z-index: 900 !important;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.75) !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+    width: 100vw !important;
+  }
+  .hub-navigation-tabs {
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    gap: 2px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    width: 100% !important;
+  }
+  .hub-navigation-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .hub-navigation-tabs .hub-tab {
+    flex-direction: column !important;
+    gap: 3px !important;
+    padding: 4px 6px !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 4px !important;
+    min-width: 44px !important;
+    height: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .hub-navigation-tabs .hub-tab.active {
+    background: rgba(0, 210, 255, 0.12) !important;
+    color: var(--color-cyan) !important;
+  }
+
+  /* Mobile Stacked Holdings Cards */
+  .holding-position-card .institutional-perf-track {
+    display: none;
+  }
+  .holding-position-card.is-expanded .institutional-perf-track {
+    display: flex !important;
+    animation: fadeIn 0.2s ease;
+  }
+
+  /* Live TV on Mobile */
+  .livestream-player-stage.dual-mode {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .floating-pip-container {
+    bottom: 5rem !important; /* bottom-20 (80px), cleanly above mobile nav */
+    right: 0.75rem !important; /* right-3 (12px) */
+    width: calc(100vw - 1.5rem) !important;
+    max-width: 320px !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 210, 255, 0.3) !important;
+  }
+
+  /* 44x44px touch height on interactive triggers */
+  .btn-stats-drawer-toggle,
+  .btn-manager-auth,
+  .ai-ask-btn,
+  .ai-quick-chip,
+  #btn-refresh-news,
+  #btn-lock-portfolio,
+  .tab-btn,
+  .tf-btn,
+  .pip-ctrl-btn,
+  .channel-pill,
+  .livestream-mode-btn,
+  .form-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Prevent iOS Safari auto-zoom on input focus */
+  input,
+  select,
+  textarea,
+  .form-input,
+  .form-select,
+  .ai-ask-input,
+  #watchlist-search-input,
+  #news-search-input {
+    font-size: 16px !important;
   }
 }
 
@@ -2129,4 +2433,15 @@ html, body {
   background: var(--color-cyan) !important;
   color: #06090E !important;
   box-shadow: 0 0 10px rgba(0, 210, 255, 0.5) !important;
+}
+
+.yt-fallback-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+.yt-fallback-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
+  color: var(--text-bright);
 }
