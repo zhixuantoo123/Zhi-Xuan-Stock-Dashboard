@@ -141,33 +141,54 @@ class TradingApp {
       });
     });
 
-    // Right Hub tab switcher
+    // Right Hub tab switcher (Unified for Desktop and Mobile)
     const hubTabs = document.querySelectorAll(".hub-tab");
     hubTabs.forEach(tab => {
       tab.addEventListener("click", () => {
-        hubTabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        tab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-        const targetView = tab.dataset.view;
+        this.switchHubView(tab.dataset.view);
+      });
+    });
 
-        document.querySelectorAll(".hub-view-panel").forEach(panel => {
-          panel.style.display = panel.id === targetView ? "flex" : "none";
-        });
+    // Mobile Bottom Navigation Bar (5 buttons: Chart/AI, Portfolio, Scanner, Live TV, More)
+    const mobNavBtns = document.querySelectorAll(".mob-nav-btn[data-view]");
+    mobNavBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        this.switchHubView(btn.dataset.view);
+      });
+    });
 
-        if (targetView === "view-scanner" && this.scanner) {
-          this.scanner.scan(this.marketItems);
-        }
-        if (targetView === "view-livestream" && this.livestream) {
-          this.livestream.render();
-        }
+    // Mobile "More" Bottom Sheet Toggle & Close Handlers
+    const mobNavMore = document.getElementById("mob-nav-more");
+    const moreOverlay = document.getElementById("mobile-more-overlay");
+    const btnCloseMore = document.getElementById("btn-close-more-sheet");
 
-        // On mobile portrait, scroll smoothly to active view panel
-        if (window.innerWidth < 768) {
-          const workspaceSection = document.querySelector(".hub-workspace");
-          if (workspaceSection) {
-            workspaceSection.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
+    if (mobNavMore && moreOverlay) {
+      mobNavMore.addEventListener("click", () => {
+        moreOverlay.classList.toggle("open");
+      });
+    }
+
+    if (btnCloseMore && moreOverlay) {
+      btnCloseMore.addEventListener("click", () => {
+        moreOverlay.classList.remove("open");
+      });
+    }
+
+    if (moreOverlay) {
+      moreOverlay.addEventListener("click", (e) => {
+        if (e.target === moreOverlay) {
+          moreOverlay.classList.remove("open");
         }
+      });
+    }
+
+    // Mobile "More" Sheet Item Click Handlers (Live News, Dates SGT, Alerts)
+    const sheetItems = document.querySelectorAll(".more-sheet-item[data-view]");
+    sheetItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const targetView = item.dataset.view;
+        this.switchHubView(targetView);
+        if (moreOverlay) moreOverlay.classList.remove("open");
       });
     });
 
@@ -302,6 +323,65 @@ class TradingApp {
     // Request notification permission if available
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
+    }
+  }
+
+  // Unified Hub View Switcher for Desktop & Mobile
+  switchHubView(targetView) {
+    if (!targetView) return;
+
+    // 1. Sync desktop hub tabs
+    const hubTabs = document.querySelectorAll(".hub-tab");
+    hubTabs.forEach(tab => {
+      const isMatch = tab.dataset.view === targetView;
+      tab.classList.toggle("active", isMatch);
+      if (isMatch) {
+        tab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+    });
+
+    // 2. Sync mobile bottom navigation bar (5 buttons)
+    const mobNavBtns = document.querySelectorAll(".mob-nav-btn[data-view]");
+    const moreBtn = document.getElementById("mob-nav-more");
+    const isDirectNav = Array.from(mobNavBtns).some(b => b.dataset.view === targetView);
+
+    mobNavBtns.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.view === targetView);
+    });
+
+    if (moreBtn) {
+      // If targetView is in the "More" sheet (view-news, view-calendar, view-alerts), highlight More button
+      moreBtn.classList.toggle("active", !isDirectNav);
+    }
+
+    // 3. Sync "More" sheet item active states
+    document.querySelectorAll(".more-sheet-item").forEach(item => {
+      item.classList.toggle("active", item.dataset.view === targetView);
+    });
+
+    // 4. Toggle view panels
+    document.querySelectorAll(".hub-view-panel").forEach(panel => {
+      panel.style.display = panel.id === targetView ? "flex" : "none";
+    });
+
+    // 5. Trigger submodules
+    if (targetView === "view-scanner" && this.scanner) {
+      this.scanner.scan(this.marketItems);
+    }
+    if (targetView === "view-livestream" && this.livestream) {
+      this.livestream.render();
+    }
+
+    // 6. Smooth scroll on mobile (< 768px)
+    if (window.innerWidth < 768) {
+      if (targetView === "view-ai-analyst") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        const workspaceSection = document.querySelector(".hub-workspace");
+        if (workspaceSection) {
+          workspaceSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
     }
   }
 

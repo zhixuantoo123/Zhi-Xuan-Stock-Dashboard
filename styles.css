@@ -1864,6 +1864,49 @@ html, body {
   }
 }
 
+/* DEDICATED OHLCV STRIP (ABOVE CHART CANVAS) */
+.chart-ohlcv-strip {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  padding: 4px 10px;
+  background: #080C14;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+.chart-ohlcv-strip::-webkit-scrollbar {
+  display: none;
+}
+.chart-ohlcv-strip .legend-ohlc {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ohlc-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.ohlc-lbl {
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 10px;
+}
+
+/* Timeframe label shortening helpers */
+.tf-short {
+  display: none;
+}
+
+/* Mobile Bottom Navigation & More Sheet Base (Desktop Hidden) */
+.mobile-bottom-nav,
+.mobile-more-overlay {
+  display: none;
+}
+
 /* MOBILE PORTRAIT (< 768px): Thumb-friendly single-column layout */
 @media (max-width: 768px) {
   body {
@@ -1871,57 +1914,142 @@ html, body {
     overflow-y: auto;
   }
   .dashboard-workspace {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-    padding-bottom: 76px; /* space for fixed bottom nav */
-    overflow-y: visible;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding-bottom: 76px !important; /* space for fixed bottom nav */
+    overflow-y: visible !important;
+    gap: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Sticky Compact Top Bar */
+  /* 1. Single-Row 48px Compact Top Bar */
   .top-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    flex-wrap: wrap;
-    padding: 6px 10px;
-    background: #060910;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    padding: 0 10px !important;
+    background: #060910 !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+  }
+  .brand-section {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  .brand-logo {
+    font-size: 13px !important;
+  }
+  .brand-tag {
+    display: none !important; /* Hide SITUATION ROOM */
+  }
+  .live-pulse {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  .radar-scan-box {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  .status-live-text {
+    font-size: 9px !important;
+  }
+  .vix-header-box {
+    margin: 0 auto !important;
+    padding: 3px 8px !important;
+    height: 28px !important;
+    background: rgba(255, 56, 92, 0.12) !important;
+    border: 1px solid rgba(255, 56, 92, 0.35) !important;
+    border-radius: 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+  }
+  #vix-regime-badge,
+  .vix-header-box svg {
+    display: none !important; /* Hide ELEVATED (20-30) sub-pill on mobile */
+  }
+  .header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  .header-actions .btn-label {
+    display: none !important; /* icon only */
+  }
+  .header-actions .btn-icon {
+    padding: 5px 7px !important;
+    min-height: 32px !important;
   }
   #btn-toggle-fullscreen {
     display: none !important;
   }
 
-  /* Single-row horizontally scrollable world clocks ticker strip right below header */
+  /* 2. Single-Row Horizontally Scrollable World Clocks Strip */
   .market-clocks {
-    order: 10;
-    width: 100%;
     display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
     scrollbar-width: none !important;
-    padding: 5px 8px !important;
-    margin-top: 4px;
-    background: #080C14;
-    border-top: 1px solid var(--border-subtle);
-    gap: 12px;
+    padding: 5px 12px !important;
+    background: #080C14 !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    font-size: 11px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    margin: 0 !important;
   }
   .market-clocks::-webkit-scrollbar {
     display: none;
   }
   .clock-item {
-    flex-shrink: 0;
-    padding: 0 4px;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+  }
+  .clock-header {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  .clock-val {
+    font-size: 11px !important;
+    font-weight: 700 !important;
   }
 
-  /* Compact Watchlist: horizontal swipeable ticker pill bar directly above the chart */
+  /* 3. Ticker Ribbon on Mobile: Zero Empty Gaps */
+  .ticker-ribbon-container {
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    background: #060910 !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+  }
+
+  /* 4. Compact Watchlist Selector (Horizontal Swipeable Ticker Pills above Chart) */
   .panel {
-    border-right: none;
-    border-bottom: 1px solid var(--border-subtle);
-    max-height: none;
-    padding: 0;
-    background: #070B14;
-    order: 1;
+    border: none !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #070B14 !important;
+    order: 1 !important;
   }
   .panel-header,
   .watchlist-controls {
@@ -1933,23 +2061,28 @@ html, body {
     overflow-x: auto !important;
     white-space: nowrap !important;
     scrollbar-width: none !important;
-    padding: 6px 8px !important;
+    padding: 4px 8px !important;
     gap: 6px !important;
-    max-height: none !important;
+    background: #070B14 !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    margin: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
   .watchlist-items::-webkit-scrollbar {
     display: none;
   }
   .asset-row {
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    padding: 6px 12px !important;
-    border-radius: 20px !important;
+    gap: 6px !important;
+    padding: 3px 8px !important;
+    border-radius: 14px !important;
     background: #0D1321 !important;
     border: 1px solid #1C273D !important;
     margin: 0 !important;
+    height: 26px !important;
   }
   .asset-row.active {
     background: rgba(0, 210, 255, 0.15) !important;
@@ -1963,8 +2096,8 @@ html, body {
     display: none !important;
   }
   .asset-row .asset-left {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
   }
   .asset-row .asset-symbol {
     font-size: 11px !important;
@@ -1981,22 +2114,27 @@ html, body {
     border-radius: 3px !important;
   }
 
-  /* Center Panel / Chart on mobile: 42vh height & scrollable strips */
+  /* 5. Center Panel / Chart First on Mobile */
   .chart-workspace {
-    order: 2;
-    height: auto;
+    order: 2 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   .chart-canvas-container {
-    height: 42vh !important;
-    min-height: 280px;
+    height: 34vh !important;
+    min-height: 240px !important;
   }
   .chart-controls-bar {
-    display: flex;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    padding-bottom: 4px;
-    gap: 8px;
+    display: flex !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    padding: 6px 8px !important;
+    gap: 6px !important;
+    align-items: center !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
   }
   .chart-controls-bar::-webkit-scrollbar {
     display: none;
@@ -2004,12 +2142,29 @@ html, body {
   .timeframe-toolbar,
   .chart-type-toolbar,
   .indicators-toolbar {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    flex-shrink: 0;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    flex-shrink: 0 !important;
+  }
+  .timeframe-toolbar {
+    padding: 2px 0 !important;
+  }
+
+  /* Shorten Timeframe Labels on Mobile */
+  .tf-full {
+    display: none !important;
+  }
+  .tf-short {
+    display: inline !important;
+  }
+  .tf-btn {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    min-height: 28px !important;
   }
 
   /* Secondary stats strip collapsed by default behind accordion toggle on mobile */
@@ -2026,65 +2181,165 @@ html, body {
     display: flex !important;
   }
 
-  /* Right Panel / Hub Workspace on mobile */
+  /* 6. Right Panel / Workspace Views on Mobile */
   .hub-workspace {
-    order: 3;
-    height: auto;
-    padding-bottom: 24px;
-  }
-
-  /* Fixed Bottom Navigation Bar for one-handed thumb navigation */
-  .tabs-scroll-arrow {
-    display: none !important;
+    order: 3 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 0 24px 0 !important;
+    margin: 0 !important;
+    border-left: none !important;
   }
   .hub-tabs-header-wrap {
+    display: none !important; /* Hide cluttered 7-tab scrollbar header on mobile */
+  }
+
+  /* 7. Clean 5-Item Fixed Bottom Navigation Bar (h-14, grid-cols-5) */
+  .mobile-bottom-nav {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    height: 58px !important;
+    height: 56px !important;
     background: #070B13 !important;
     border-top: 1px solid var(--border-subtle) !important;
     z-index: 900 !important;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.75) !important;
-    padding: 0 4px !important;
-    margin: 0 !important;
-    width: 100vw !important;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.8) !important;
   }
-  .hub-navigation-tabs {
-    height: 100% !important;
+  .mob-nav-btn {
     display: flex !important;
-    align-items: center !important;
-    justify-content: space-around !important;
-    gap: 2px !important;
-    overflow-x: auto !important;
-    scrollbar-width: none !important;
-    width: 100% !important;
-  }
-  .hub-navigation-tabs::-webkit-scrollbar {
-    display: none;
-  }
-  .hub-navigation-tabs .hub-tab {
     flex-direction: column !important;
-    gap: 3px !important;
-    padding: 4px 6px !important;
-    font-size: 9px !important;
-    font-weight: 700 !important;
-    border: none !important;
-    background: transparent !important;
-    border-radius: 4px !important;
-    min-width: 44px !important;
-    height: 48px !important;
-    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    gap: 3px !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-secondary) !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    padding: 4px !important;
+    transition: all var(--transition-fast) !important;
+    user-select: none !important;
   }
-  .hub-navigation-tabs .hub-tab.active {
-    background: rgba(0, 210, 255, 0.12) !important;
+  .mob-nav-btn svg {
+    stroke: var(--text-secondary);
+    transition: stroke var(--transition-fast);
+  }
+  .mob-nav-btn:hover,
+  .mob-nav-btn.active {
     color: var(--color-cyan) !important;
   }
+  .mob-nav-btn.active svg {
+    stroke: var(--color-cyan) !important;
+  }
 
-  /* Mobile Stacked Holdings Cards */
+  /* 8. Mobile "More" Bottom Sheet Modal */
+  .mobile-more-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 9999 !important;
+    display: none;
+    align-items: flex-end !important;
+  }
+  .mobile-more-overlay.open {
+    display: flex !important;
+  }
+  .mobile-more-sheet {
+    width: 100% !important;
+    background: #0B101D !important;
+    border-top: 1px solid var(--border-strong) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 12px 16px 28px !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9) !important;
+    animation: sheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  @keyframes sheetSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .more-sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin: 0 auto 12px;
+  }
+  .more-sheet-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-bright);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .more-sheet-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .more-sheet-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-bright);
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--transition-fast);
+  }
+  .more-sheet-item:hover,
+  .more-sheet-item:active,
+  .more-sheet-item.active {
+    background: var(--bg-card-hover);
+    border-color: var(--color-cyan);
+  }
+  .more-sheet-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: rgba(0, 210, 255, 0.1);
+    color: var(--color-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .more-sheet-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .more-sheet-label {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .more-sheet-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .more-sheet-close-btn {
+    width: 100%;
+    margin-top: 14px;
+    padding: 11px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* 9. Mobile Stacked Holdings Cards */
   .holding-position-card .institutional-perf-track {
     display: none;
   }
@@ -2093,7 +2348,7 @@ html, body {
     animation: fadeIn 0.2s ease;
   }
 
-  /* Live TV on Mobile */
+  /* 10. Live TV on Mobile */
   .livestream-player-stage.dual-mode {
     display: flex !important;
     flex-direction: column !important;

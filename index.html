@@ -202,9 +202,15 @@
       <div class="chart-controls-bar">
         <!-- Timeframes & Historical Ranges -->
         <div class="toolbar-group timeframe-toolbar">
-          <button class="tf-btn active" data-tf="ALL" style="color: #00F090; font-weight: 800;" title="View full history from Day 1 inception without date cutoff">ALL (Day 1 Inception)</button>
+          <button class="tf-btn active" data-tf="ALL" style="color: #00F090; font-weight: 800;" title="View full history from Day 1 inception without date cutoff">
+            <span class="tf-full">ALL (Day 1 Inception)</span>
+            <span class="tf-short">ALL</span>
+          </button>
           <button class="tf-btn" data-tf="5Y">5Y</button>
-          <button class="tf-btn" data-tf="1Y" style="color: var(--color-cyan); font-weight: 700;">1Y (Past Year)</button>
+          <button class="tf-btn" data-tf="1Y" style="color: var(--color-cyan); font-weight: 700;">
+            <span class="tf-full">1Y (Past Year)</span>
+            <span class="tf-short">1Y</span>
+          </button>
           <button class="tf-btn" data-tf="6M">6M</button>
           <button class="tf-btn" data-tf="1M">1M</button>
           <button class="tf-btn" data-tf="1W">1W</button>
@@ -238,18 +244,19 @@
         </div>
       </div>
 
+      <!-- Dedicated Single-Line Scrollable OHLCV Strip (Above Chart Canvas) -->
+      <div class="chart-ohlcv-strip mono" id="chart-ohlcv-strip">
+        <div class="legend-ohlc">
+          <span class="ohlc-item"><span class="ohlc-lbl">O:</span> <span id="leg-open"><span class="skeleton-text skeleton-lvl">--</span></span></span>
+          <span class="ohlc-item"><span class="ohlc-lbl">H:</span> <span id="leg-high"><span class="skeleton-text skeleton-lvl">--</span></span></span>
+          <span class="ohlc-item"><span class="ohlc-lbl">L:</span> <span id="leg-low"><span class="skeleton-text skeleton-lvl">--</span></span></span>
+          <span class="ohlc-item"><span class="ohlc-lbl">C:</span> <span id="leg-close"><span class="skeleton-text skeleton-lvl">--</span></span></span>
+          <span class="ohlc-item"><span class="ohlc-lbl">V:</span> <span id="leg-vol"><span class="skeleton-text skeleton-lvl">--</span></span></span>
+        </div>
+      </div>
+
       <!-- Main Canvas Container -->
       <div class="chart-canvas-container">
-        <!-- OHLC Tooltip Legend -->
-        <div class="chart-legend-overlay mono">
-          <div class="legend-ohlc">
-            <span style="color: var(--text-muted);">O:</span> <span id="leg-open"><span class="skeleton-text skeleton-lvl">--</span></span>
-            <span style="color: var(--text-muted);">H:</span> <span id="leg-high"><span class="skeleton-text skeleton-lvl">--</span></span>
-            <span style="color: var(--text-muted);">L:</span> <span id="leg-low"><span class="skeleton-text skeleton-lvl">--</span></span>
-            <span style="color: var(--text-muted);">C:</span> <span id="leg-close"><span class="skeleton-text skeleton-lvl">--</span></span>
-            <span style="color: var(--text-muted);">V:</span> <span id="leg-vol"><span class="skeleton-text skeleton-lvl">--</span></span>
-          </div>
-        </div>
         <div id="tv-chart"></div>
       </div>
 
@@ -901,6 +908,68 @@
     </div>
     <div class="floating-pip-body" id="floating-pip-body">
       <!-- Injected by livestream.js -->
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM NAVIGATION BAR (md:hidden, 5-items: Chart/AI, Portfolio, Scanner, Live TV, More) -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <button class="mob-nav-btn active" data-view="view-ai-analyst" id="mob-nav-analyst">
+      <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      <span>Chart/AI</span>
+    </button>
+    <button class="mob-nav-btn" data-view="view-portfolio" id="mob-nav-portfolio">
+      <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+      <span>Portfolio</span>
+    </button>
+    <button class="mob-nav-btn" data-view="view-scanner" id="mob-nav-scanner">
+      <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+      <span>Scanner</span>
+    </button>
+    <button class="mob-nav-btn" data-view="view-livestream" id="mob-nav-livestream">
+      <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+      <span>Live TV</span>
+    </button>
+    <button class="mob-nav-btn" id="mob-nav-more" aria-label="More Terminal Modules">
+      <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+      <span>More</span>
+    </button>
+  </nav>
+
+  <!-- MOBILE "MORE" BOTTOM SHEET (News, Dates SGT, Alerts) -->
+  <div class="mobile-more-overlay" id="mobile-more-overlay">
+    <div class="mobile-more-sheet" id="mobile-more-sheet">
+      <div class="more-sheet-handle"></div>
+      <div class="more-sheet-title">More Terminal Modules</div>
+      <div class="more-sheet-grid">
+        <button class="more-sheet-item" data-view="view-news">
+          <div class="more-sheet-icon">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M18 18h-8"></path><path d="M18 10h-8"></path></svg>
+          </div>
+          <div class="more-sheet-text">
+            <span class="more-sheet-label">Live News</span>
+            <span class="more-sheet-desc">Global Financial & Central Bank Wire</span>
+          </div>
+        </button>
+        <button class="more-sheet-item" data-view="view-calendar">
+          <div class="more-sheet-icon">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="more-sheet-text">
+            <span class="more-sheet-label">Dates (SGT)</span>
+            <span class="more-sheet-desc">Singapore & Global Economic Events</span>
+          </div>
+        </button>
+        <button class="more-sheet-item" data-view="view-alerts">
+          <div class="more-sheet-icon">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          </div>
+          <div class="more-sheet-text">
+            <span class="more-sheet-label">Alerts & Rules</span>
+            <span class="more-sheet-desc">Price Breakouts & Volatility Alarms</span>
+          </div>
+        </button>
+      </div>
+      <button class="more-sheet-close-btn" id="btn-close-more-sheet">Cancel</button>
     </div>
   </div>
 
