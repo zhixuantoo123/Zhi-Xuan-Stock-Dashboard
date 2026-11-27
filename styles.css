@@ -1744,6 +1744,195 @@ html, body {
   color: var(--text-muted);
 }
 
+/* ========================================================
+   STOCK P&L COUNTRY SEGMENTATION & DAILY PERFORMANCE MATRIX
+   (Modeled after Tiger Brokers Institutional Stock P&L)
+   ======================================================== */
+.stock-pnl-panel {
+  background: #0B0F19;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.stock-pnl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 6px;
+}
+
+.stock-pnl-title-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stock-pnl-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-bright);
+  letter-spacing: 0.02em;
+}
+
+.stock-pnl-type-tabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pnl-type-tab {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 0;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.pnl-type-tab.active {
+  color: #FBBF24; /* Tiger yellow highlight */
+  border-bottom: 2px solid #FBBF24;
+}
+
+.stock-pnl-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.country-pills-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.country-pill {
+  background: #141B29;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.country-pill:hover {
+  background: #1D2638;
+  color: #FFF;
+}
+
+.country-pill.active {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #FBBF24;
+  color: #FBBF24;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.25);
+}
+
+.stock-pnl-search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #101622;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 2px 8px;
+  flex: 1;
+  max-width: 180px;
+}
+
+.stock-pnl-search-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-bright);
+  font-size: 11px;
+  width: 100%;
+}
+
+.country-pnl-summary-card {
+  background: #0E1420;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pnl-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.pnl-summary-label {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.pnl-summary-val {
+  font-weight: 800;
+}
+
+/* Region badges on stock cards */
+.region-tag-sg {
+  background: rgba(224, 86, 172, 0.18) !important;
+  color: #F472B6 !important;
+  border: 1px solid rgba(244, 114, 182, 0.4) !important;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+
+.region-tag-hk {
+  background: rgba(249, 115, 22, 0.18) !important;
+  color: #FB923C !important;
+  border: 1px solid rgba(249, 115, 22, 0.4) !important;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+
+.region-tag-us {
+  background: rgba(14, 165, 233, 0.18) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(14, 165, 233, 0.4) !important;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+
+/* Prominent Daily P&L Badge in Holdings Card */
+.holding-daily-pnl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 /* Institutional View-Only Security Bar */
 .portfolio-security-bar {
   display: flex;

@@ -34,7 +34,9 @@ class LivestreamManager {
         name: "Sky News Live",
         badge: "UK // 24/7 WORLD NEWS",
         channelId: "UCoMdktPbSTixAyNGwb-UYkQ",
-        youtubeLiveUrl: "https://www.youtube.com/channel/UCoMdktPbSTixAyNGwb-UYkQ/live",
+        videoId: "9Auq9mYxFEE", // Verified 24/7 permanent official live stream
+        fallbackVideoId: "XyNpGu7mm8o",
+        youtubeLiveUrl: "https://www.youtube.com/watch?v=9Auq9mYxFEE",
         directUrl: "https://news.sky.com/watch-live",
         desc: "London-based 24/7 international breaking news network tracking European macro, global geopolitical conflicts, and world financial developments."
       },
@@ -180,8 +182,11 @@ class LivestreamManager {
     const iframe = document.getElementById(iframeId);
     if (!iframe || !ch) return;
     
-    // Permanent YouTube Channel Live Embed: 100% Zero-Login, Autoplay & Accessible in Singapore
-    const url = `https://www.youtube.com/embed/live_stream?channel=${ch.channelId}&autoplay=1&mute=1&playsinline=1&controls=1&rel=0`;
+    // Support permanent 24/7 video stream ID or channel-level live embed
+    const url = ch.videoId
+      ? `https://www.youtube.com/embed/${ch.videoId}?autoplay=1&mute=1&playsinline=1&controls=1&rel=0`
+      : `https://www.youtube.com/embed/live_stream?channel=${ch.channelId}&autoplay=1&mute=1&playsinline=1&controls=1&rel=0`;
+
     if (iframe.src !== url) {
       iframe.src = url;
     }

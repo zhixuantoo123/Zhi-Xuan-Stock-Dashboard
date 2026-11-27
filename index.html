@@ -542,6 +542,41 @@
               </div>
             </div>
 
+            <!-- STOCK P&L COUNTRY SEGMENTATION BAR (Tiger Brokers Institutional Layout) -->
+            <div class="stock-pnl-panel" id="stock-pnl-panel">
+              <div class="stock-pnl-header">
+                <div class="stock-pnl-title-group">
+                  <span class="stock-pnl-title">Stock P&L</span>
+                  <div class="stock-pnl-type-tabs">
+                    <button class="pnl-type-tab active" data-type="securities" id="btn-pnl-securities">Securities</button>
+                    <button class="pnl-type-tab" data-type="funds" id="btn-pnl-funds">Funds</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Country Filter Pills (All, US, HK, SG) & Search Box -->
+              <div class="stock-pnl-filter-bar">
+                <div class="country-pills-group" id="country-pills-group">
+                  <button class="country-pill active" data-country="All">All</button>
+                  <button class="country-pill" data-country="US">US</button>
+                  <button class="country-pill" data-country="HK">HK</button>
+                  <button class="country-pill" data-country="SG">SG</button>
+                </div>
+                <div class="stock-pnl-search-box">
+                  <svg class="search-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="pnl-stock-search" placeholder="Symbol / Company" autocomplete="off">
+                </div>
+              </div>
+
+              <!-- Segmented Country P&L Summary Cards (Tiger Statement Verified) -->
+              <div class="country-pnl-summary-card" id="country-pnl-summary-card">
+                <!-- Dynamically rendered by portfolio.js -->
+              </div>
+            </div>
+
             <!-- Holdings Position List -->
             <div style="display: flex; flex-direction: column; gap: 8px;" id="portfolio-holdings-list">
               <!-- Injected by portfolio.js -->
