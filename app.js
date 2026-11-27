@@ -7,7 +7,19 @@ class TradingApp {
     this.marketItems = this.getDefaultMarketItems();
     this.selectedItem = this.marketItems[0];
     this.customWatchlist = JSON.parse(localStorage.getItem("custom_watchlist") || '["^GSPC", "BTC-USD", "GC=F", "CL=F"]');
-    this.alerts = JSON.parse(localStorage.getItem("active_alerts") || '[]');
+    
+    // Hydrate alerts from localStorage or populate with audited baseline alerts
+    const savedAlerts = localStorage.getItem("active_alerts");
+    if (savedAlerts) {
+      try { this.alerts = JSON.parse(savedAlerts); } catch(e) { this.alerts = []; }
+    } else {
+      this.alerts = [
+        { id: "alt-sp500", symbol: "^GSPC", condition: "price_above", targetValue: 7200, createdAt: "14:00:00", active: true },
+        { id: "alt-btc", symbol: "BTC-USD", condition: "price_above", targetValue: 65000, createdAt: "14:00:00", active: true },
+        { id: "alt-d05", symbol: "D05.SI", condition: "price_above", targetValue: 68.00, createdAt: "14:00:00", active: true }
+      ];
+      localStorage.setItem("active_alerts", JSON.stringify(this.alerts));
+    }
     this.soundEnabled = true;
 
     // Sub-modules
@@ -364,6 +376,205 @@ class TradingApp {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
+
+    // Initialize Cmd+K / / Quick Command Switcher
+    this.initQuickSwitcher();
+  }
+
+  // Institutional Quick Command Switcher (Cmd+K / /)
+  initQuickSwitcher() {
+    const modal = document.getElementById("quick-switcher-modal");
+    const input = document.getElementById("quick-switcher-input");
+    const results = document.getElementById("quick-switcher-results");
+    const triggerBtn = document.getElementById("btn-quick-switcher");
+
+    if (!modal || !input || !results) return;
+
+    let selectedIndex = 0;
+    let filteredItems = [];
+
+    const openSwitcher = () => {
+      modal.classList.add("open");
+      input.value = "";
+      input.focus();
+      renderResults("");
+    };
+
+    const closeSwitcher = () => {
+      modal.classList.remove("open");
+    };
+
+    if (triggerBtn) {
+      triggerBtn.addEventListener("click", openSwitcher);
+    }
+
+    // Keyboard Shortcuts: Cmd+K / Ctrl+K and '/' (outside input/textarea)
+    window.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (modal.classList.contains("open")) {
+          closeSwitcher();
+        } else {
+          openSwitcher();
+        }
+      } else if (e.key === "/" && !modal.classList.contains("open")) {
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
+        if (activeTag !== "input" && activeTag !== "textarea") {
+          e.preventDefault();
+          openSwitcher();
+        }
+      } else if (e.key === "Escape" && modal.classList.contains("open")) {
+        closeSwitcher();
+      }
+    });
+
+    const getAvailableItems = () => {
+      const items = [];
+
+      // 1. Terminal Workspaces / Tabs
+      const tabs = [
+        { type: "tab", id: "view-analyst", name: "AI Analyst", sub: "Macro regime & real-time synthesis", icon: "⚡", action: () => this.switchHubView("view-analyst") },
+        { type: "tab", id: "view-portfolio", name: "Audited Portfolio", sub: "Holdings, P&L & statements", icon: "💼", action: () => this.switchHubView("view-portfolio") },
+        { type: "tab", id: "view-scanner", name: "Technical Scanner", sub: "RSI extremes & breakout signals", icon: "📡", action: () => this.switchHubView("view-scanner") },
+        { type: "tab", id: "view-news", name: "Live News Wire", sub: "Institutional market wires & headlines", icon: "📰", action: () => this.switchHubView("view-news") },
+        { type: "tab", id: "view-livestream", name: "Live TV Control Room", sub: "CNA, Sky News, Bloomberg 24/7", icon: "📺", action: () => this.switchHubView("view-livestream") },
+        { type: "tab", id: "view-calendar", name: "Dates (SGT)", sub: "Singapore & global economic calendar", icon: "📅", action: () => this.switchHubView("view-calendar") },
+        { type: "tab", id: "view-alerts", name: "Alerts & Rules", sub: "Price alerts & volatility triggers", icon: "🔔", action: () => this.switchHubView("view-alerts") }
+      ];
+      tabs.forEach(t => items.push(t));
+
+      // 2. Global Market Assets
+      this.marketItems.forEach(m => {
+        items.push({
+          type: "asset",
+          id: m.symbol,
+          name: `${m.symbol} • ${m.name}`,
+          sub: `${m.category} • $${m.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${m.pctChange >= 0 ? '+' : ''}${m.pctChange}%)`,
+          icon: m.category === "Crypto" ? "₿" : m.category === "Commodities" ? "⛏" : "📈",
+          action: () => this.selectAsset(m.symbol)
+        });
+      });
+
+      // 3. Audited Holdings Stocks
+      const portfolioStocks = [
+        { symbol: "D05.SI", name: "DBS Group Holdings", market: "SGX", price: "S$66.24" },
+        { symbol: "O39.SI", name: "OCBC Bank", market: "SGX", price: "S$26.62" },
+        { symbol: "1D0.SI", name: "Kimly Limited", market: "SGX", price: "S$0.365" },
+        { symbol: "ES3.SI", name: "SS SPDR STI ETF", market: "SGX", price: "S$5.064" },
+        { symbol: "ESG.SI", name: "Lion-OSPL Low Carbon S$", market: "SGX", price: "S$1.419" },
+        { symbol: "AAPL", name: "Apple Inc.", market: "NASDAQ", price: "$354.07" },
+        { symbol: "GOOGL", name: "Alphabet Inc.", market: "NASDAQ", price: "$279.05" },
+        { symbol: "MSFT", name: "Microsoft Corporation", market: "NASDAQ", price: "$468.20" },
+        { symbol: "NVDA", name: "NVIDIA Corporation", market: "NASDAQ", price: "$138.25" },
+        { symbol: "AMZN", name: "Amazon.com Inc.", market: "NASDAQ", price: "$210.15" },
+        { symbol: "TSLA", name: "Tesla Inc.", market: "NASDAQ", price: "$238.80" },
+        { symbol: "VWRA.L", name: "Vanguard FTSE All-World (IBKR)", market: "LSE", price: "$142.50" },
+        { symbol: "03067.HK", name: "ISHARESHSTECH", market: "HKEX", price: "HK$7.68" },
+        { symbol: "01398.HK", name: "ICBC", market: "HKEX", price: "HK$7.61" }
+      ];
+      portfolioStocks.forEach(s => {
+        items.push({
+          type: "holding",
+          id: s.symbol,
+          name: `${s.symbol} • ${s.name}`,
+          sub: `Portfolio Holding • ${s.market} • ${s.price}`,
+          icon: "💼",
+          action: () => this.selectAsset(s.symbol)
+        });
+      });
+
+      return items;
+    };
+
+    const renderResults = (query) => {
+      const q = query.trim().toLowerCase();
+      const all = getAvailableItems();
+      filteredItems = q
+        ? all.filter(item => item.name.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q) || item.id.toLowerCase().includes(q))
+        : all.slice(0, 16);
+
+      selectedIndex = 0;
+      results.innerHTML = "";
+
+      if (filteredItems.length === 0) {
+        results.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px;">No matching assets or commands found for "${query}"</div>`;
+        return;
+      }
+
+      let currentType = "";
+      filteredItems.forEach((item, idx) => {
+        if (item.type !== currentType) {
+          currentType = item.type;
+          const header = document.createElement("div");
+          header.className = "qs-group-header";
+          header.textContent = currentType === "tab" ? "Workspace Tabs" : currentType === "holding" ? "Audited Portfolio Holdings" : "Global Markets";
+          results.appendChild(header);
+        }
+
+        const row = document.createElement("div");
+        row.className = `qs-item ${idx === selectedIndex ? "selected" : ""}`;
+        row.innerHTML = `
+          <div class="qs-item-left">
+            <span class="qs-item-icon">${item.icon}</span>
+            <div>
+              <span class="qs-item-title">${item.name}</span>
+              <span class="qs-item-sub">${item.sub}</span>
+            </div>
+          </div>
+          <div class="qs-item-right">
+            <span class="qs-badge mono">${item.type === 'tab' ? 'SWITCH' : 'CHART'}</span>
+          </div>
+        `;
+
+        row.addEventListener("mouseenter", () => {
+          selectedIndex = idx;
+          updateSelectedRow();
+        });
+
+        row.addEventListener("click", () => {
+          item.action();
+          closeSwitcher();
+        });
+
+        results.appendChild(row);
+      });
+    };
+
+    const updateSelectedRow = () => {
+      const rows = results.querySelectorAll(".qs-item");
+      rows.forEach((r, idx) => {
+        r.classList.toggle("selected", idx === selectedIndex);
+        if (idx === selectedIndex) {
+          r.scrollIntoView({ block: "nearest" });
+        }
+      });
+    };
+
+    input.addEventListener("input", (e) => {
+      renderResults(e.target.value);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (filteredItems.length > 0) {
+          selectedIndex = (selectedIndex + 1) % filteredItems.length;
+          updateSelectedRow();
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (filteredItems.length > 0) {
+          selectedIndex = (selectedIndex - 1 + filteredItems.length) % filteredItems.length;
+          updateSelectedRow();
+        }
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (filteredItems[selectedIndex]) {
+          filteredItems[selectedIndex].action();
+          closeSwitcher();
+        }
+      }
+    });
   }
 
   // Unified Hub View Switcher for Desktop & Mobile

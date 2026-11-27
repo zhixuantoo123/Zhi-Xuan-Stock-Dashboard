@@ -39,28 +39,28 @@
           <span class="market-status-dot status-open"></span>
           <span class="status-sgt">SINGAPORE (SGT)</span>
         </div>
-        <div class="mono clock-val" id="clock-sgt">--:--:--</div>
+        <div class="mono clock-val" id="clock-sgt">14:55:00</div>
       </div>
       <div class="clock-item">
         <div class="clock-header">
           <span class="market-status-dot status-closed"></span>
           <span>NEW YORK (EST)</span>
         </div>
-        <div class="mono clock-val" id="clock-nyc">--:--:--</div>
+        <div class="mono clock-val" id="clock-nyc">01:55:00</div>
       </div>
       <div class="clock-item">
         <div class="clock-header">
           <span class="market-status-dot status-open"></span>
           <span>LONDON (GMT)</span>
         </div>
-        <div class="mono clock-val" id="clock-lon">--:--:--</div>
+        <div class="mono clock-val" id="clock-lon">06:55:00</div>
       </div>
       <div class="clock-item">
         <div class="clock-header">
           <span class="market-status-dot status-open"></span>
           <span>TOKYO (JST)</span>
         </div>
-        <div class="mono clock-val" id="clock-tyo">--:--:--</div>
+        <div class="mono clock-val" id="clock-tyo">15:55:00</div>
       </div>
     </div>
 
@@ -80,6 +80,10 @@
 
       <!-- Header Actions (System controls) -->
       <div class="header-actions">
+        <button class="top-util-btn quick-switcher-trigger" id="btn-quick-switcher" title="Search assets, tabs & commands (Cmd+K / /)">
+          <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="mono" style="font-size: 10px; font-weight: 700;">⌘K</span>
+        </button>
         <button class="btn-icon active" id="btn-toggle-sound" title="Toggle Sound Chime">
           <svg class="icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
           <span class="btn-label" id="sound-btn-text">Sound</span>
@@ -174,8 +178,8 @@
 
           <!-- Primary Visual Focal Point: Current Price & 24h Change -->
           <div class="main-price-block">
-            <span class="main-price mono" id="header-active-price"><span class="skeleton-text skeleton-price">---.--</span></span>
-            <span class="main-change mono" id="header-active-change"><span class="skeleton-text skeleton-badge">--</span></span>
+            <span class="main-price mono" id="header-active-price">$7,182.78</span>
+            <span class="main-change mono" id="header-active-change"><span class="ribbon-badge mono bear-bg">▼ -140.85 (-1.92%)</span></span>
           </div>
         </div>
 
@@ -206,15 +210,9 @@
       <div class="chart-controls-bar">
         <!-- Timeframes & Historical Ranges -->
         <div class="toolbar-group timeframe-toolbar">
-          <button class="tf-btn active" data-tf="ALL" style="color: #00F090; font-weight: 800;" title="View full history from Day 1 inception without date cutoff">
-            <span class="tf-full">ALL (Day 1 Inception)</span>
-            <span class="tf-short">ALL</span>
-          </button>
+          <button class="tf-btn active" data-tf="ALL" style="color: #00F090; font-weight: 800;" title="View full history from Day 1 inception">ALL</button>
           <button class="tf-btn" data-tf="5Y">5Y</button>
-          <button class="tf-btn" data-tf="1Y" style="color: var(--color-cyan); font-weight: 700;">
-            <span class="tf-full">1Y (Past Year)</span>
-            <span class="tf-short">1Y</span>
-          </button>
+          <button class="tf-btn" data-tf="1Y" style="color: var(--color-cyan); font-weight: 700;">1Y</button>
           <button class="tf-btn" data-tf="6M">6M</button>
           <button class="tf-btn" data-tf="1M">1M</button>
           <button class="tf-btn" data-tf="1W">1W</button>
@@ -444,7 +442,7 @@
               </button>
               <div class="summary-asset-box">
                 <span class="summary-label">Total Assets:</span>
-                <span class="summary-val mono" id="summary-total-assets"><span class="skeleton-text skeleton-price">---.--</span></span>
+                <span class="summary-val mono" id="summary-total-assets">S$46,950.40</span>
               </div>
               <div class="currency-dropdown-wrap" id="currency-dropdown-wrap">
                 <button class="currency-pill-btn" id="btn-currency-selector" title="Select Valuation Currency" aria-haspopup="true" aria-expanded="false">
@@ -460,7 +458,7 @@
 
             <div class="summary-bar-right">
               <span class="summary-label">Daily P&L:</span>
-              <span class="summary-pnl mono bull" id="summary-daily-pnl"><span class="skeleton-text skeleton-badge">--</span></span>
+              <span class="summary-pnl mono bull" id="summary-daily-pnl">+S$409.00 (+0.88%)</span>
             </div>
           </div>
 
@@ -474,12 +472,12 @@
               </div>
             </div>
             <div class="mono" style="font-size: 22px; font-weight: 800; color: var(--text-bright); margin-top: 2px;" id="port-total-value">
-              <span class="skeleton-text skeleton-price">---.--</span>
+              S$46,950.40 SGD
             </div>
             <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; margin-top: 4px;">
               <span style="color: var(--text-muted);">Unrealized P&L:</span>
-              <span class="mono" id="port-total-pnl" style="font-weight: 700;"><span class="skeleton-text skeleton-badge">--</span></span>
-              <span id="port-total-pnl-pct" class="mono ribbon-badge bull-bg"><span class="skeleton-text skeleton-badge">--</span></span>
+              <span class="mono bull" id="port-total-pnl" style="font-weight: 700;">+S$7,422.50 SGD</span>
+              <span id="port-total-pnl-pct" class="mono ribbon-badge bull-bg">+18.78% Overall Gain</span>
             </div>
           </div>
 
@@ -705,11 +703,14 @@
           <!-- Live Channel Telemetry & Intel Card -->
           <div class="stream-intel-card" id="stream-intel-card">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <span class="cyan" style="font-weight: 700; font-size: 11px;" id="intel-channel-name">Bloomberg Television (USA / GLOBAL FINANCE)</span>
-              <span class="mono" style="font-size: 10px; color: var(--color-bull); font-weight: 700;">● 1080p HD FEED</span>
+              <span class="cyan" style="font-weight: 700; font-size: 11px;" id="intel-channel-name">Sky News Live (UK // 24/7 WORLD NEWS)</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="mono" style="font-size: 10px; color: var(--color-bull); font-weight: 700;">● 1080p HD FEED</span>
+                <a id="intel-channel-link" href="https://news.sky.com/watch-live" target="_blank" rel="noopener noreferrer" style="color: var(--color-cyan); font-size: 10px; text-decoration: none; font-weight: 700;">Open Official Feed ↗</a>
+              </div>
             </div>
             <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.45;" id="intel-channel-desc">
-              24/7 institutional market news covering Wall Street equities, US Treasury yields, central bank announcements, and macroeconomic forecasts.
+              London-based 24/7 international breaking news network tracking European macro, global geopolitical conflicts, and world financial developments.
             </div>
           </div>
         </div>
@@ -718,7 +719,7 @@
         <div class="hub-view-panel" id="view-calendar" style="display: none; flex-direction: column; gap: 10px; width: 100%;">
           <div class="calendar-time-header">
             <span>TIMEZONE: SINGAPORE (SGT, UTC+8)</span>
-            <span class="mono" id="cal-countdown-text">CALCULATING...</span>
+            <span class="mono" id="cal-countdown-text">NEXT: US CORE PCE IN 6H 35M</span>
           </div>
 
           <div style="display: flex; gap: 4px;">
@@ -1009,6 +1010,24 @@
         </button>
       </div>
       <button class="more-sheet-close-btn" id="btn-close-more-sheet">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Institutional Quick Command Switcher Modal (Cmd+K / /) -->
+  <div class="quick-switcher-modal modal-overlay" id="quick-switcher-modal">
+    <div class="qs-box">
+      <div class="qs-input-wrap">
+        <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" class="qs-input" id="quick-switcher-input" placeholder="Jump to any asset, stock, tab, or command... (e.g. DBS, AAPL, Portfolio, TV)" autocomplete="off" spellcheck="false">
+        <span class="qs-esc-hint mono">ESC</span>
+      </div>
+      <div class="qs-results" id="quick-switcher-results">
+        <!-- Dynamically populated by app.js -->
+      </div>
+      <div class="qs-footer">
+        <span>Use <span class="mono">↑</span> <span class="mono">↓</span> to navigate, <span class="mono">↵</span> to select</span>
+        <span class="mono">ZHI XUAN COMMAND MATRIX</span>
+      </div>
     </div>
   </div>
 

@@ -34,9 +34,9 @@ class LivestreamManager {
         name: "Sky News Live",
         badge: "UK // 24/7 WORLD NEWS",
         channelId: "UCoMdktPbSTixAyNGwb-UYkQ",
-        videoId: "9Auq9mYxFEE", // Verified 24/7 permanent official live stream
-        fallbackVideoId: "XyNpGu7mm8o",
-        youtubeLiveUrl: "https://www.youtube.com/watch?v=9Auq9mYxFEE",
+        videoId: "XyNpGu7mm8o", // Verified active 24/7 official live broadcast
+        fallbackVideoId: "9Auq9mYxFEE",
+        youtubeLiveUrl: "https://www.youtube.com/watch?v=XyNpGu7mm8o",
         directUrl: "https://news.sky.com/watch-live",
         desc: "London-based 24/7 international breaking news network tracking European macro, global geopolitical conflicts, and world financial developments."
       },
@@ -211,8 +211,13 @@ class LivestreamManager {
     // Update intel card
     const nameEl = document.getElementById("intel-channel-name");
     const descEl = document.getElementById("intel-channel-desc");
+    const linkEl = document.getElementById("intel-channel-link");
     if (nameEl) nameEl.textContent = `${ch1.name} (${ch1.badge})`;
     if (descEl) descEl.textContent = ch1.desc;
+    if (linkEl) {
+      linkEl.href = ch1.directUrl || ch1.youtubeLiveUrl;
+      linkEl.textContent = `Open Official Feed ↗`;
+    }
   }
 }
 

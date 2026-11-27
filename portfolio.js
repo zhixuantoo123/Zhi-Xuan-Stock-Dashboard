@@ -413,14 +413,20 @@ class PortfolioManager {
     // Check if session previously unlocked
     if (sessionStorage.getItem("portfolio_manager_unlocked") === "true") {
       this.isManagerUnlocked = true;
-      if (editToolbar) editToolbar.style.display = "block";
+      if (editToolbar) {
+        editToolbar.classList.add("is-unlocked");
+        editToolbar.style.display = "block";
+      }
       if (authBtn) {
         authBtn.innerHTML = "🔓 Manager Mode";
         authBtn.classList.add("unlocked");
       }
     } else {
       this.isManagerUnlocked = false;
-      if (editToolbar) editToolbar.style.display = "none";
+      if (editToolbar) {
+        editToolbar.classList.remove("is-unlocked");
+        editToolbar.style.display = "none";
+      }
     }
 
     if (authBtn) {
@@ -534,7 +540,10 @@ class PortfolioManager {
     sessionStorage.setItem("portfolio_manager_unlocked", "true");
     const editToolbar = document.getElementById("manager-edit-toolbar");
     const authBtn = document.getElementById("btn-manager-auth");
-    if (editToolbar) editToolbar.style.display = "block";
+    if (editToolbar) {
+      editToolbar.classList.add("is-unlocked");
+      editToolbar.style.display = "block";
+    }
     if (authBtn) {
       authBtn.innerHTML = '<svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg> <span>Manager Mode</span>';
       authBtn.classList.add("unlocked");
@@ -548,7 +557,10 @@ class PortfolioManager {
     sessionStorage.removeItem("portfolio_manager_unlocked");
     const editToolbar = document.getElementById("manager-edit-toolbar");
     const authBtn = document.getElementById("btn-manager-auth");
-    if (editToolbar) editToolbar.style.display = "none";
+    if (editToolbar) {
+      editToolbar.classList.remove("is-unlocked");
+      editToolbar.style.display = "none";
+    }
     if (authBtn) {
       authBtn.innerHTML = '<svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-1.5 1.5L16 7l-2-2-4 4-2-2-4 4 2 2-3 3 1.5 1.5L6 17l2 2 4-4-2-2 4-4 1.5 1.5 1.5-1.5z"></path></svg> <span>Manager Login</span>';
       authBtn.classList.remove("unlocked");
