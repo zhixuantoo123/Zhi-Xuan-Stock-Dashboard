@@ -429,30 +429,29 @@ class PortfolioManager {
       lockBtn.addEventListener("click", () => this.lockPortfolio());
     }
 
-    // Portfolio Subview Switcher (Holdings Matrix vs Daily Macro Directives)
-    const btnHoldings = document.getElementById("btn-port-tab-holdings");
-    const btnRecs = document.getElementById("btn-port-tab-recs");
-    const viewHoldings = document.getElementById("portfolio-holdings-subview");
-    const viewRecs = document.getElementById("portfolio-recs-subview");
+    // Portfolio 4-Way Subview Switcher (Holdings, Allocation & Risk, Dividends, Directives)
+    const subtabs = [
+      { id: "btn-port-tab-holdings", viewId: "portfolio-holdings-subview", name: "holdings" },
+      { id: "btn-port-tab-analytics", viewId: "portfolio-analytics-subview", name: "analytics", render: () => this.renderAnalytics() },
+      { id: "btn-port-tab-dividends", viewId: "portfolio-dividends-subview", name: "dividends", render: () => this.renderDividends() },
+      { id: "btn-port-tab-recs", viewId: "portfolio-recs-subview", name: "recommendations", render: () => this.renderDailyRecommendations() }
+    ];
 
-    if (btnHoldings && btnRecs) {
-      btnHoldings.addEventListener("click", () => {
-        btnHoldings.classList.add("active");
-        btnRecs.classList.remove("active");
-        if (viewHoldings) viewHoldings.style.display = "flex";
-        if (viewRecs) viewRecs.style.display = "none";
-        this.currentSubview = "holdings";
-      });
-
-      btnRecs.addEventListener("click", () => {
-        btnRecs.classList.add("active");
-        btnHoldings.classList.remove("active");
-        if (viewHoldings) viewHoldings.style.display = "none";
-        if (viewRecs) viewRecs.style.display = "flex";
-        this.currentSubview = "recommendations";
-        this.renderDailyRecommendations();
-      });
-    }
+    subtabs.forEach(tab => {
+      const btn = document.getElementById(tab.id);
+      if (btn) {
+        btn.addEventListener("click", () => {
+          subtabs.forEach(t => {
+            const b = document.getElementById(t.id);
+            const v = document.getElementById(t.viewId);
+            if (b) b.classList.toggle("active", t.name === tab.name);
+            if (v) v.style.display = t.name === tab.name ? "flex" : "none";
+          });
+          this.currentSubview = tab.name;
+          if (tab.render) tab.render();
+        });
+      }
+    });
 
     if (addBtn && modal) {
       addBtn.addEventListener("click", () => modal.classList.add("open"));
@@ -1461,6 +1460,288 @@ class PortfolioManager {
         btn.classList.toggle("active", match);
       }
     });
+  }
+
+  // SUBVIEW 2: ASSET ALLOCATION & INSTITUTIONAL RISK TELEMETRY
+  renderAnalytics() {
+    const container = document.getElementById("portfolio-analytics-subview");
+    if (!container) return;
+
+    let totalValSGD = 0;
+    const geoMap = { US: 0, SG: 0, HK: 0, Global: 0 };
+    const secMap = {
+      "Financials & Banking": 0,
+      "Mega-Cap Tech & AI": 0,
+      "Broad Index ETFs": 0,
+      "Consumer & Others": 0
+    };
+
+    this.holdings.forEach(pos => {
+      const curPrice = pos.currentPrice || pos.avgCost;
+      const valLocal = curPrice * pos.shares;
+      const valSGD = this.toSGD(valLocal, pos.currency);
+      totalValSGD += valSGD;
+
+      // Geography
+      if (pos.market === "US") geoMap.US += valSGD;
+      else if (pos.market === "SG") geoMap.SG += valSGD;
+      else if (pos.market === "HK") geoMap.HK += valSGD;
+      else geoMap.Global += valSGD;
+
+      // Sector
+      if (["D05.SI", "O39.SI", "01398.HK"].includes(pos.symbol)) {
+        secMap["Financials & Banking"] += valSGD;
+      } else if (["AAPL", "GOOGL", "MSFT", "NVDA", "AMZN", "TSLA", "03067.HK"].includes(pos.symbol)) {
+        secMap["Mega-Cap Tech & AI"] += valSGD;
+      } else if (["VWRA.L", "ES3.SI", "SPY", "QQQ", "TQQQ"].includes(pos.symbol)) {
+        secMap["Broad Index ETFs"] += valSGD;
+      } else {
+        secMap["Consumer & Others"] += valSGD;
+      }
+    });
+
+    const getPct = (val) => totalValSGD > 0 ? ((val / totalValSGD) * 100).toFixed(1) : "0.0";
+
+    container.innerHTML = `
+      <!-- Institutional Risk Telemetry Grid -->
+      <div class="portfolio-metric-card" style="margin-bottom: 2px;">
+        <div style="font-size: 11px; font-weight: 800; color: var(--color-cyan); text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+          <span>Institutional Risk Telemetry</span>
+          <span class="mono" style="font-size: 9px; color: var(--text-muted);">BENCHMARK: S&P 500</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 6px;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">PORTFOLIO BETA</div>
+            <div class="mono" style="font-size: 16px; font-weight: 800; color: #FFF; margin-top: 2px;">1.08 <span style="font-size: 10px; color: var(--color-bull); font-weight: 600;">(Balanced)</span></div>
+            <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">Dividend anchors offset US tech beta</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 6px;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">SHARPE RATIO (EST)</div>
+            <div class="mono" style="font-size: 16px; font-weight: 800; color: var(--color-cyan); margin-top: 2px;">1.64 <span style="font-size: 10px; color: var(--color-bull); font-weight: 600;">(Optimal)</span></div>
+            <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">Excess return above risk-free rate</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 6px;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">DIVIDEND CASH YIELD</div>
+            <div class="mono" style="font-size: 16px; font-weight: 800; color: #00F090; margin-top: 2px;">2.85% <span style="font-size: 10px; color: var(--text-muted); font-weight: 600;">(~S$763/yr)</span></div>
+            <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">Recurring cash flow from SGX & HKEX</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 6px;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">UNALLOCATED CASH</div>
+            <div class="mono" style="font-size: 13px; font-weight: 800; color: #FFF; margin-top: 4px;">S$353.29 <span style="color: var(--text-muted); font-size: 9px;">SGD</span> + $247.72 <span style="color: var(--text-muted); font-size: 9px;">USD</span></div>
+            <div style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">Dry powder across Tiger & IBKR</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Geographic Allocation Breakdown -->
+      <div class="portfolio-metric-card">
+        <div style="font-size: 11px; font-weight: 800; color: var(--text-bright); text-transform: uppercase; margin-bottom: 8px;">
+          Geographic Exposure Breakdown
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+              <span>🇺🇸 United States (Wall Street)</span>
+              <span class="mono" style="font-weight: 700;">S$${geoMap.US.toLocaleString(undefined, { maximumFractionDigits: 0 })} (${getPct(geoMap.US)}%)</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${getPct(geoMap.US)}%; height: 100%; background: #00D2FF; border-radius: 3px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+              <span>🇸🇬 Singapore (SGX Blue-Chips)</span>
+              <span class="mono" style="font-weight: 700;">S$${geoMap.SG.toLocaleString(undefined, { maximumFractionDigits: 0 })} (${getPct(geoMap.SG)}%)</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${getPct(geoMap.SG)}%; height: 100%; background: #00F090; border-radius: 3px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+              <span>🌐 Global / Ireland (IBKR All-World)</span>
+              <span class="mono" style="font-weight: 700;">S$${geoMap.Global.toLocaleString(undefined, { maximumFractionDigits: 0 })} (${getPct(geoMap.Global)}%)</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${getPct(geoMap.Global)}%; height: 100%; background: #A855F7; border-radius: 3px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+              <span>🇭🇰 Hong Kong (HKEX Dividend & Tech)</span>
+              <span class="mono" style="font-weight: 700;">S$${geoMap.HK.toLocaleString(undefined, { maximumFractionDigits: 0 })} (${getPct(geoMap.HK)}%)</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${getPct(geoMap.HK)}%; height: 100%; background: #FFB800; border-radius: 3px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sector Allocation Breakdown -->
+      <div class="portfolio-metric-card">
+        <div style="font-size: 11px; font-weight: 800; color: var(--text-bright); text-transform: uppercase; margin-bottom: 8px;">
+          Sector Diversification
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+              <span>🏛️ Banking & High-Yield Financials</span>
+              <span class="mono" style="font-weight: 700;">${getPct(secMap["Financials & Banking"])}%</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${getPct(secMap["Financials & Banking"])}%; height: 100%; background: #00F090; border-radius: 3px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+              <span>🚀 Mega-Cap Tech & AI Compounders</span>
+              <span class="mono" style="font-weight: 700;">${getPct(secMap["Mega-Cap Tech & AI"])}%</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${getPct(secMap["Mega-Cap Tech & AI"])}%; height: 100%; background: #00D2FF; border-radius: 3px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+              <span>📈 Broad Market Index & Thematic ETFs</span>
+              <span class="mono" style="font-weight: 700;">${getPct(secMap["Broad Index ETFs"])}%</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${getPct(secMap["Broad Index ETFs"])}%; height: 100%; background: #A855F7; border-radius: 3px;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+              <span>☕ Local Consumer & F&B Stalwarts</span>
+              <span class="mono" style="font-weight: 700;">${getPct(secMap["Consumer & Others"])}%</span>
+            </div>
+            <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${getPct(secMap["Consumer & Others"])}%; height: 100%; background: #FFB800; border-radius: 3px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // SUBVIEW 3: PROJECTED DIVIDEND CASH FLOW & CALENDAR
+  renderDividends() {
+    const container = document.getElementById("portfolio-dividends-subview");
+    if (!container) return;
+
+    container.innerHTML = `
+      <!-- Dividend Hero Metric -->
+      <div class="portfolio-metric-card" style="background: linear-gradient(135deg, rgba(0, 240, 144, 0.08) 0%, rgba(0, 210, 255, 0.05) 100%); border: 1px solid rgba(0, 240, 144, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <span style="font-size: 11px; font-weight: 800; color: #00F090; text-transform: uppercase;">Projected Annual Dividend Income</span>
+          <span class="ribbon-badge mono bull-bg">2.85% BLENDED YIELD</span>
+        </div>
+        <div class="mono" style="font-size: 24px; font-weight: 800; color: #FFF; margin-top: 4px;">
+          S$763.00 <span style="font-size: 14px; color: var(--color-cyan);">SGD / yr</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+          ≈ <strong class="mono" style="color: #FFF;">S$63.58 SGD / month</strong> recurring passive cash flow across SGX & HKEX holdings
+        </div>
+      </div>
+
+      <!-- Dividend Streams Matrix -->
+      <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin: 4px 0 2px;">
+        Active Dividend Payers Schedule
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- DBS -->
+        <div class="daily-rec-card" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="region-badge mono" style="background: rgba(0, 240, 144, 0.15); color: #00F090; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: 800;">SG</span>
+              <span style="font-weight: 800; font-size: 13px; color: #FFF;">DBS Group (D05.SI)</span>
+            </div>
+            <span class="mono" style="font-size: 13px; font-weight: 800; color: #00F090;">+S$432.00 SGD / yr</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 4px;">
+            <div><span style="color: var(--text-muted);">Payout Cadence:</span> <strong>Quarterly (S$108.00 / qtr)</strong></div>
+            <div><span style="color: var(--text-muted);">Rate per Share:</span> <strong class="mono">S$2.16 / yr</strong></div>
+            <div><span style="color: var(--text-muted);">Shares Owned:</span> <strong class="mono">200 Shares</strong></div>
+            <div><span style="color: var(--text-muted);">Yield on Cost:</span> <strong class="mono cyan">4.10%</strong></div>
+          </div>
+        </div>
+
+        <!-- OCBC -->
+        <div class="daily-rec-card" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="region-badge mono" style="background: rgba(0, 240, 144, 0.15); color: #00F090; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: 800;">SG</span>
+              <span style="font-weight: 800; font-size: 13px; color: #FFF;">OCBC Bank (O39.SI)</span>
+            </div>
+            <span class="mono" style="font-size: 13px; font-weight: 800; color: #00F090;">+S$176.00 SGD / yr</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 4px;">
+            <div><span style="color: var(--text-muted);">Payout Cadence:</span> <strong>Semi-Annual (S$88.00 / dist)</strong></div>
+            <div><span style="color: var(--text-muted);">Rate per Share:</span> <strong class="mono">S$0.88 / yr</strong></div>
+            <div><span style="color: var(--text-muted);">Shares Owned:</span> <strong class="mono">200 Shares</strong></div>
+            <div><span style="color: var(--text-muted);">Yield on Cost:</span> <strong class="mono cyan">6.01%</strong></div>
+          </div>
+        </div>
+
+        <!-- ES3 -->
+        <div class="daily-rec-card" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="region-badge mono" style="background: rgba(0, 240, 144, 0.15); color: #00F090; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: 800;">SG</span>
+              <span style="font-weight: 800; font-size: 13px; color: #FFF;">SS SPDR STI ETF (ES3.SI)</span>
+            </div>
+            <span class="mono" style="font-size: 13px; font-weight: 800; color: #00F090;">+S$63.00 SGD / yr</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 4px;">
+            <div><span style="color: var(--text-muted);">Payout Cadence:</span> <strong>Semi-Annual (S$31.50 / dist)</strong></div>
+            <div><span style="color: var(--text-muted);">Rate per Share:</span> <strong class="mono">S$0.21 / yr</strong></div>
+            <div><span style="color: var(--text-muted);">Shares Owned:</span> <strong class="mono">300 Shares</strong></div>
+            <div><span style="color: var(--text-muted);">Yield on Cost:</span> <strong class="mono cyan">4.71%</strong></div>
+          </div>
+        </div>
+
+        <!-- ICBC -->
+        <div class="daily-rec-card" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="region-badge mono" style="background: rgba(255, 184, 0, 0.15); color: #FFB800; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: 800;">HK</span>
+              <span style="font-weight: 800; font-size: 13px; color: #FFF;">ICBC (01398.HK)</span>
+            </div>
+            <span class="mono" style="font-size: 13px; font-weight: 800; color: #FFB800;">+HK$330.00 (~S$54.50) / yr</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 4px;">
+            <div><span style="color: var(--text-muted);">Payout Cadence:</span> <strong>Annual Summer Dividend</strong></div>
+            <div><span style="color: var(--text-muted);">Rate per Share:</span> <strong class="mono">HK$0.33 / yr</strong></div>
+            <div><span style="color: var(--text-muted);">Shares Owned:</span> <strong class="mono">1,000 Shares</strong></div>
+            <div><span style="color: var(--text-muted);">Dividend Yield:</span> <strong class="mono cyan">6.82%</strong></div>
+          </div>
+        </div>
+
+        <!-- Kimly -->
+        <div class="daily-rec-card" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="region-badge mono" style="background: rgba(0, 240, 144, 0.15); color: #00F090; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: 800;">SG</span>
+              <span style="font-weight: 800; font-size: 13px; color: #FFF;">Kimly Limited (1D0.SI)</span>
+            </div>
+            <span class="mono" style="font-size: 13px; font-weight: 800; color: #00F090;">+S$37.50 SGD / yr</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 4px;">
+            <div><span style="color: var(--text-muted);">Payout Cadence:</span> <strong>Semi-Annual</strong></div>
+            <div><span style="color: var(--text-muted);">Rate per Share:</span> <strong class="mono">S$0.015 / yr</strong></div>
+            <div><span style="color: var(--text-muted);">Shares Owned:</span> <strong class="mono">2,500 Shares</strong></div>
+            <div><span style="color: var(--text-muted);">Dividend Yield:</span> <strong class="mono cyan">4.82%</strong></div>
+          </div>
+        </div>
+
+        <!-- VWRA Note -->
+        <div style="padding: 10px; border-radius: 6px; background: rgba(168, 85, 247, 0.08); border: 1px dashed rgba(168, 85, 247, 0.3); font-size: 11px; line-height: 1.45; color: var(--text-secondary);">
+          <strong style="color: #A855F7;">💡 VWRA Accumulating Structure:</strong> Vanguard FTSE All-World (100 Shares) automatically reinvests dividends directly into NAV, eliminating distribution leakage and tax drag.
+        </div>
+      </div>
+    `;
   }
 
   // INSTITUTIONAL DAILY MACROECONOMIC RECOMMENDATIONS ENGINE

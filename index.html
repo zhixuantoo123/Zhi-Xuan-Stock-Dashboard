@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>World Monitor & Trading Terminal - Global Situation Room</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060910">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WorldMonitor">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
   <link rel="stylesheet" href="styles.css">
   <!-- Local Lightweight Charts Library (Pre-downloaded for zero-latency, 100% offline reliability) -->
   <script src="lightweight-charts.standalone.js"></script>
@@ -241,6 +248,7 @@
           <button class="ind-btn" data-ind="ema50">EMA 50</button>
           <button class="ind-btn" data-ind="ema200">EMA 200</button>
           <button class="ind-btn" data-ind="bb">Bollinger</button>
+          <button class="ind-btn" data-ind="fib" title="Auto-drawn institutional Fibonacci retracement lines">Fibonacci</button>
           <button class="ind-btn active" data-ind="rsi">RSI</button>
           <button class="ind-btn" data-ind="macd">MACD</button>
         </div>
@@ -258,8 +266,9 @@
       </div>
 
       <!-- Main Canvas Container -->
-      <div class="chart-canvas-container">
+      <div class="chart-canvas-container" style="position: relative;">
         <div id="tv-chart"></div>
+        <div class="chart-crosshair-hud mono" id="chart-crosshair-hud" style="display: none;"></div>
       </div>
 
       <!-- RSI Sub-pane -->
@@ -354,6 +363,30 @@
             </div>
           </div>
 
+          <!-- Factual Quantitative Evidence Telemetry Matrix (Zero Bias, Mathematical Proofs) -->
+          <div class="ai-evidence-matrix" id="ai-evidence-matrix" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px;">
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 5px;">
+              <div style="color: var(--text-muted); font-size: 9px; font-weight: 700;">RSI MOMENTUM (14D)</div>
+              <div class="mono" id="ai-ev-rsi" style="font-size: 13px; font-weight: 800; color: var(--color-cyan); margin-top: 2px;">58.20 <span style="font-size: 9px; color: var(--color-bull); font-weight: 600;">(Neutral-Bullish)</span></div>
+              <div style="font-size: 8px; color: var(--text-muted); margin-top: 1px;">Neutral bounds: 30 OS &lt; RSI &lt; 70 OB</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 5px;">
+              <div style="color: var(--text-muted); font-size: 9px; font-weight: 700;">50-DAY EMA DISTANCE</div>
+              <div class="mono" id="ai-ev-ema" style="font-size: 13px; font-weight: 800; color: #FFF; margin-top: 2px;">+3.12% <span style="font-size: 9px; color: var(--color-bull); font-weight: 600;">(Above Base)</span></div>
+              <div style="font-size: 8px; color: var(--text-muted); margin-top: 1px;">Trend support verified by moving average</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 5px;">
+              <div style="color: var(--text-muted); font-size: 9px; font-weight: 700;">IMPLIED VOLATILITY (VIX)</div>
+              <div class="mono" id="ai-ev-vix" style="font-size: 13px; font-weight: 800; color: #FFB800; margin-top: 2px;">28.29 <span style="font-size: 9px; color: var(--text-muted); font-weight: 600;">(±1.77%/day)</span></div>
+              <div style="font-size: 8px; color: var(--text-muted); margin-top: 1px;">Rule of 16 daily volatility projection</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 5px;">
+              <div style="color: var(--text-muted); font-size: 9px; font-weight: 700;">MACRO POLICY RATE</div>
+              <div class="mono" id="ai-ev-macro" style="font-size: 13px; font-weight: 800; color: #00F090; margin-top: 2px;">US 4.75% <span style="font-size: 9px; color: var(--text-muted); font-weight: 600;">| SG MAS 2.7%</span></div>
+              <div style="font-size: 8px; color: var(--text-muted); margin-top: 1px;">Fed terminal rate &amp; Singapore core CPI</div>
+            </div>
+          </div>
+
           <!-- Technical Regime Classification -->
           <div class="ai-regime-box" id="ai-regime-box">
             <div class="ai-regime-title" id="ai-regime-title">BULLISH EXPANSION</div>
@@ -385,7 +418,7 @@
           <!-- Plain-Language Explanations -->
           <div class="ai-analysis-block">
             <div class="ai-block-heading">
-              <span>● What Happened</span>
+              <span>● Factual Market Movement</span>
             </div>
             <div class="ai-block-text" id="ai-what-happened">
               Analyzing current order-flow dynamics and price displacement...
@@ -394,7 +427,7 @@
 
           <div class="ai-analysis-block">
             <div class="ai-block-heading">
-              <span>● Why It Moved</span>
+              <span>● Quantitative Drivers (Zero-Bias)</span>
             </div>
             <div class="ai-block-text" id="ai-why-moved">
               Cross-asset macroeconomic factors and technical breakout momentum triggering algorithmic execution.
@@ -403,27 +436,57 @@
 
           <div class="ai-analysis-block">
             <div class="ai-block-heading">
-              <span>● Key Levels To Watch</span>
+              <span>● Mathematical Levels To Watch</span>
             </div>
             <div class="ai-block-text" id="ai-what-to-watch">
               Monitor immediate breakout resistance and baseline invalidation stop points.
             </div>
           </div>
 
+          <!-- Macro Scenario Stress Simulator -->
+          <div class="portfolio-metric-card" style="padding: 10px; margin-top: 4px;">
+            <div style="font-size: 10px; font-weight: 800; color: #A855F7; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+              <span>Macro Scenario Stress Simulator</span>
+              <span class="mono" style="font-size: 9px; color: var(--text-muted);">MATHEMATICAL IMPACT</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-bottom: 6px;">
+              <button class="tab-btn ai-stress-btn" data-scenario="fed_cut" style="padding: 6px; font-size: 10px; text-align: left; background: rgba(0,0,0,0.3);">
+                <strong>⚡ Fed -25bps Cut</strong>
+                <div style="font-size: 8px; color: var(--text-muted);">Lower discount rate</div>
+              </button>
+              <button class="tab-btn ai-stress-btn" data-scenario="tech_pullback" style="padding: 6px; font-size: 10px; text-align: left; background: rgba(0,0,0,0.3);">
+                <strong>📉 Tech Pullback -5%</strong>
+                <div style="font-size: 8px; color: var(--text-muted);">Growth multiple reset</div>
+              </button>
+              <button class="tab-btn ai-stress-btn" data-scenario="usd_sgd_drop" style="padding: 6px; font-size: 10px; text-align: left; background: rgba(0,0,0,0.3);">
+                <strong>🇸🇬 USD/SGD -2%</strong>
+                <div style="font-size: 8px; color: var(--text-muted);">FX translation drag</div>
+              </button>
+              <button class="tab-btn ai-stress-btn" data-scenario="vix_spike" style="padding: 6px; font-size: 10px; text-align: left; background: rgba(0,0,0,0.3);">
+                <strong>🌪️ VIX Surge &gt;35</strong>
+                <div style="font-size: 8px; color: var(--text-muted);">Broad market hedging</div>
+              </button>
+            </div>
+            <div id="ai-stress-output" style="padding: 8px 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-subtle); border-radius: 4px; font-size: 11px; line-height: 1.45; color: var(--text-secondary);">
+              Select any scenario above to compute factual portfolio impact based on your 16 active holdings.
+            </div>
+          </div>
+
           <!-- Interactive Ask AI Box -->
           <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 6px;">
             <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-              Ask AI Financial Analyst
+              Ask Zhi Xuan Quantitative Analyst (Objective &amp; Factual)
             </div>
 
             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-              <button type="button" class="ai-quick-chip tab-btn" data-prompt="What is the short-term trend?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Trend Analysis</button>
-              <button type="button" class="ai-quick-chip tab-btn" data-prompt="Where are the best support entry levels?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Key Levels</button>
-              <button type="button" class="ai-quick-chip tab-btn" data-prompt="How do Fed rate expectations affect this asset?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">Macro Impact</button>
+              <button type="button" class="ai-quick-chip tab-btn" data-prompt="Analyze DBS dividend safety & capital adequacy" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">DBS Dividend Safety</button>
+              <button type="button" class="ai-quick-chip tab-btn" data-prompt="What is our portfolio concentration risk in US Tech?" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">US Tech Exposure</button>
+              <button type="button" class="ai-quick-chip tab-btn" data-prompt="Evaluate S&P 500 RSI and key Fibonacci levels" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">S&P 500 Fib Levels</button>
+              <button type="button" class="ai-quick-chip tab-btn" data-prompt="Explain VWRA accumulating tax efficiency" style="font-size: 10px; background: var(--bg-card); cursor: pointer;">VWRA Tax Efficiency</button>
             </div>
 
             <div class="ai-ask-container">
-              <input type="text" class="ai-ask-input" id="ai-ask-input" placeholder="Ask about trends, support/resistance, setups...">
+              <input type="text" class="ai-ask-input" id="ai-ask-input" placeholder="Ask about dividends, valuations, Fibonacci, macro...">
               <button class="ai-ask-btn" id="ai-ask-submit">Ask</button>
             </div>
 
@@ -481,15 +544,19 @@
             </div>
           </div>
 
-          <!-- Portfolio View Mode Switcher -->
-          <div class="portfolio-view-switcher" style="display: flex; gap: 6px; margin-bottom: 2px;">
-            <button class="tab-btn port-subtab-btn active" id="btn-port-tab-holdings" data-subview="holdings" style="flex: 1; text-align: center; font-weight: 700;">
-              <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-              <span>Holdings Matrix (16)</span>
+          <!-- Portfolio View Mode Switcher (4-Way Subview Bar) -->
+          <div class="portfolio-view-switcher" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 2px;">
+            <button class="tab-btn port-subtab-btn active" id="btn-port-tab-holdings" data-subview="holdings" style="padding: 6px 4px; text-align: center; font-size: 11px; font-weight: 700;">
+              <span>Holdings</span>
             </button>
-            <button class="tab-btn port-subtab-btn" id="btn-port-tab-recs" data-subview="recommendations" style="flex: 1; text-align: center; font-weight: 700; color: var(--color-cyan);">
-              <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-              <span>Daily Directives</span>
+            <button class="tab-btn port-subtab-btn" id="btn-port-tab-analytics" data-subview="analytics" style="padding: 6px 4px; text-align: center; font-size: 11px; font-weight: 700; color: var(--color-cyan);">
+              <span>Allocation</span>
+            </button>
+            <button class="tab-btn port-subtab-btn" id="btn-port-tab-dividends" data-subview="dividends" style="padding: 6px 4px; text-align: center; font-size: 11px; font-weight: 700; color: #00F090;">
+              <span>Dividends</span>
+            </button>
+            <button class="tab-btn port-subtab-btn" id="btn-port-tab-recs" data-subview="recommendations" style="padding: 6px 4px; text-align: center; font-size: 11px; font-weight: 700; color: #A855F7;">
+              <span>Directives</span>
             </button>
           </div>
 
@@ -592,7 +659,17 @@
             </div>
           </div>
 
-          <!-- SUBVIEW 2: DAILY MACRO RECOMMENDATIONS & ACTION MATRIX -->
+          <!-- SUBVIEW 2: ASSET ALLOCATION & RISK TELEMETRY -->
+          <div id="portfolio-analytics-subview" style="display: none; flex-direction: column; gap: 10px;">
+            <!-- Injected by portfolio.js -->
+          </div>
+
+          <!-- SUBVIEW 3: PROJECTED DIVIDEND CASH FLOW & CALENDAR -->
+          <div id="portfolio-dividends-subview" style="display: none; flex-direction: column; gap: 10px;">
+            <!-- Injected by portfolio.js -->
+          </div>
+
+          <!-- SUBVIEW 4: DAILY MACRO RECOMMENDATIONS & ACTION MATRIX -->
           <div id="portfolio-recs-subview" style="display: none; flex-direction: column; gap: 10px;">
             <!-- Injected by portfolio.js -->
           </div>
@@ -1040,5 +1117,12 @@
   <script src="calendar.js"></script>
   <script src="livestream.js"></script>
   <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

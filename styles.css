@@ -2256,6 +2256,53 @@ html, body {
   }
 }
 
+/* Floating Interactive Crosshair HUD Tooltip */
+.chart-crosshair-hud {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  z-index: 20;
+  pointer-events: none;
+  background: rgba(6, 10, 18, 0.88);
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  border-radius: 6px;
+  padding: 6px 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  font-size: 11px;
+  line-height: 1.4;
+  color: #FFF;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: fadeIn 0.1s ease-out;
+}
+.hud-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 4px;
+  margin-bottom: 3px;
+  font-weight: 700;
+}
+.hud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 12px;
+}
+.hud-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+.hud-lbl {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
 /* DEDICATED OHLCV STRIP (ABOVE CHART CANVAS) */
 .chart-ohlcv-strip {
   display: flex;

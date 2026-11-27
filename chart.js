@@ -26,10 +26,12 @@ class TradingChartManager {
       ema50: false,
       ema200: false,
       bb: false,
+      fib: false,
       volume: true,
       rsi: true,
       macd: false
     };
+    this.fibPriceLines = [];
 
     this.rsiCanvas = document.getElementById("rsi-canvas");
     this.macdCanvas = document.getElementById("macd-canvas");
@@ -386,6 +388,55 @@ class TradingChartManager {
 
     // Pivot & Support / Resistance
     this.calculatedIndicators.keyLevels = this.calcKeyLevels(this.currentData);
+
+    // Auto-drawn institutional Fibonacci retracement lines
+    this.updateFibonacciLines();
+  }
+
+  // Auto-Drawn Institutional Fibonacci Retracement Price Lines
+  updateFibonacciLines() {
+    const targetSeries = this.candleSeries || this.lineSeries || this.areaSeries;
+    if (!targetSeries) return;
+
+    // Clean previous fib lines
+    if (this.fibPriceLines && this.fibPriceLines.length > 0) {
+      this.fibPriceLines.forEach(line => {
+        try { targetSeries.removePriceLine(line); } catch (e) {}
+      });
+      this.fibPriceLines = [];
+    }
+
+    if (!this.activeIndicators.fib || !this.currentData || this.currentData.length < 5) return;
+
+    const levels = this.calcKeyLevels(this.currentData);
+    const high = levels.high60;
+    const low = levels.low60;
+    const diff = high - low;
+    if (diff <= 0) return;
+
+    const fibRatios = [
+      { ratio: 0.000, price: high, label: "0.0% Swing High", color: "#FF385C", style: 0 },
+      { ratio: 0.236, price: high - diff * 0.236, label: "23.6% Fib", color: "#FFB800", style: 2 },
+      { ratio: 0.382, price: high - diff * 0.382, label: "38.2% Golden Pocket", color: "#00D2FF", style: 2 },
+      { ratio: 0.500, price: high - diff * 0.500, label: "50.0% Equilibrium", color: "#A855F7", style: 1 },
+      { ratio: 0.618, price: high - diff * 0.618, label: "61.8% Golden Ratio", color: "#00F090", style: 2 },
+      { ratio: 0.786, price: high - diff * 0.786, label: "78.6% Deep Retracement", color: "#3B82F6", style: 2 },
+      { ratio: 1.000, price: low, label: "100.0% Swing Low", color: "#00F090", style: 0 }
+    ];
+
+    fibRatios.forEach(fib => {
+      try {
+        const line = targetSeries.createPriceLine({
+          price: fib.price,
+          color: fib.color,
+          lineWidth: fib.ratio === 0.618 || fib.ratio === 0.382 ? 2 : 1,
+          lineStyle: fib.style,
+          axisLabelVisible: true,
+          title: `FIB ${fib.label}: $${fib.price.toFixed(2)}`
+        });
+        this.fibPriceLines.push(line);
+      } catch (e) {}
+    });
   }
 
   updateLineIndicator(name, values, times, color, width = 1) {
@@ -469,10 +520,43 @@ class TradingChartManager {
   }
 
   updateLegend(param) {
-    if (!param || !param.time || !param.seriesData) return;
-    const bar = param.seriesData.get(this.candleSeries) || param.seriesData.get(this.lineSeries);
+    const hud = document.getElementById("chart-crosshair-hud");
+    if (!param || !param.time || !param.seriesData) {
+      if (hud) hud.style.display = "none";
+      return;
+    }
+    const bar = param.seriesData.get(this.candleSeries) || param.seriesData.get(this.lineSeries) || param.seriesData.get(this.areaSeries);
     if (bar) {
       this.setLegendValues(bar);
+      if (hud) {
+        hud.style.display = "flex";
+        const dateObj = new Date(param.time * 1000);
+        const dateStr = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        const openVal = bar.open || bar.value || 0;
+        const closeVal = bar.close || bar.value || 0;
+        const isUp = closeVal >= openVal;
+        const movePct = openVal > 0 ? (((closeVal - openVal) / openVal) * 100).toFixed(2) : "0.00";
+        const sign = isUp ? "+" : "";
+
+        hud.innerHTML = `
+          <div class="hud-title-row">
+            <span class="cyan" style="font-weight: 800;">${this.currentSymbol || 'ASSET'}</span>
+            <span style="font-size: 10px; color: var(--text-muted);">${dateStr}</span>
+          </div>
+          <div class="hud-grid">
+            <div class="hud-item"><span class="hud-lbl">O:</span> <span>$${openVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+            <div class="hud-item"><span class="hud-lbl">H:</span> <span>$${(bar.high || bar.value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+            <div class="hud-item"><span class="hud-lbl">L:</span> <span>$${(bar.low || bar.value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+            <div class="hud-item"><span class="hud-lbl">C:</span> <span class="${isUp ? 'bull' : 'bear'}">$${closeVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3px; font-size: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2px;">
+            <span class="hud-lbl">MOVE: <strong class="${isUp ? 'bull' : 'bear'}">${sign}${movePct}%</strong></span>
+            <span class="hud-lbl">VOL: <strong>${bar.volume ? (bar.volume > 1e6 ? (bar.volume / 1e6).toFixed(2) + 'M' : (bar.volume / 1e3).toFixed(1) + 'K') : '--'}</strong></span>
+          </div>
+        `;
+      }
+    } else if (hud) {
+      hud.style.display = "none";
     }
   }
 

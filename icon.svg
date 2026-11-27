@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="110" fill="#060910"/>
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#172338" stroke-width="8"/>
+  <circle cx="256" cy="256" r="130" fill="none" stroke="#1E314F" stroke-width="6"/>
+  <circle cx="256" cy="256" r="70" fill="none" stroke="#253E65" stroke-width="4"/>
+  <!-- Crosshairs -->
+  <line x1="256" y1="40" x2="256" y2="472" stroke="#1A2B42" stroke-width="6" stroke-dasharray="10 10"/>
+  <line x1="40" y1="256" x2="472" y2="256" stroke="#1A2B42" stroke-width="6" stroke-dasharray="10 10"/>
+  <!-- Globe Grid Lines -->
+  <ellipse cx="256" cy="256" rx="90" ry="190" fill="none" stroke="#00D2FF" stroke-width="6" opacity="0.6"/>
+  <ellipse cx="256" cy="256" rx="190" ry="90" fill="none" stroke="#00D2FF" stroke-width="6" opacity="0.6"/>
+  <!-- Glowing Center Pulse -->
+  <circle cx="256" cy="256" r="28" fill="#00F090" opacity="0.8"/>
+  <circle cx="256" cy="256" r="14" fill="#FFFFFF"/>
+  <!-- Sweeping Radar Beam -->
+  <path d="M256 256 L390 122 A190 190 0 0 0 256 66 Z" fill="url(#radarGradient)" opacity="0.45"/>
+  <defs>
+    <linearGradient id="radarGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00D2FF" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#00F090" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+</svg>

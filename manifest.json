@@ -1,0 +1,24 @@
+{
+  "name": "World Monitor & Trading Terminal",
+  "short_name": "WorldMonitor",
+  "description": "Institutional-Grade Global Macro Monitor, Multi-Asset Trading Terminal & Audited Portfolio Tracker",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060910",
+  "theme_color": "#060910",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
