@@ -509,7 +509,8 @@ AUDITED USER PORTFOLIO CONTEXT:
     // 1. VWRA / All-World Indexing / New Purchase
     if (q.includes("vwra") || q.includes("world") || q.includes("etf") || q.includes("all-world") || q.includes("ucits")) {
       return `<strong>Audited VWRA Wealth Engine Status:</strong><br>
-      • <strong>Total Holding:</strong> You hold <strong>48 Shares Total</strong> across two brokerages: <strong>46 shares on IBKR</strong> plus <strong>2 shares on Tiger Brokers (TRWBUKETF)</strong>.<br>
+      • <strong>Total Holding:</strong> You hold <strong>48 Shares Total</strong> (46 on IBKR + 2 on Tiger Brokers TRWBUKETF).<br>
+      • <strong>Weighted Average Purchase Price:</strong> <strong>$190.64 USD</strong> per share ($9,150.62 USD total cost basis; improved from $191.10 via DCA).<br>
       • <strong>Latest Trade (Nov 27, 2026):</strong> Bought 2 shares @ $180.0106 ($360.02 USD total, Comm $1.89 USD) in Tiger Trade.<br>
       • <strong>Tax Advantage:</strong> VWRA is Irish-domiciled, capping US dividend withholding tax at <strong>15%</strong> (vs 30% US standard) with 0% capital gains tax in Singapore.<br>
       • <strong>Directive:</strong> Holds 3,600+ companies across 47 nations. Continue disciplined monthly dollar-cost averaging into your global core.`;

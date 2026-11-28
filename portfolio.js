@@ -3,7 +3,12 @@
 class PortfolioManager {
   constructor(app) {
     this.app = app;
-    this.storageKey = "user_holdings_v4";
+    this.storageKey = "user_holdings_v5";
+    try {
+      localStorage.removeItem("user_holdings_v4");
+      localStorage.removeItem("user_holdings_v3");
+      localStorage.removeItem("verified_portfolio_holdings");
+    } catch(e) {}
 
     // Base FX Rates relative to 1 SGD (Base Currency)
     this.fxRates = {
@@ -55,15 +60,15 @@ class PortfolioManager {
   loadHoldings() {
     // Exact holdings extracted from statements as of Nov 25, 2026
     const verifiedHoldings = [
-      // --- INTERACTIVE BROKERS (IBKR - U18729869) ---
+      // --- INTERACTIVE BROKERS (IBKR) & TIGER BROKERS (TRWBUKETF) ---
       {
         id: "ibkr-vwra",
         symbol: "VWRA",
         rawSymbol: "VWRA",
         name: "Vanguard FTSE All-World UCITS ETF (LSE)",
-        broker: "IBKR",
-        shares: 46,
-        avgCost: 191.10,
+        broker: "IBKR & Tiger",
+        shares: 48,
+        avgCost: 190.64,
         currentPrice: 174.00,
         change: 1.15,
         pctChange: 0.66,
@@ -73,7 +78,7 @@ class PortfolioManager {
         totalPnl: 974.56,
         unrealizedPnl: 440.25,
         realizedPnl: 534.31,
-        notes: "Core long-term diversified global wealth engine (Irish Domiciled, Accumulating)"
+        notes: "Core long-term diversified global wealth engine (Irish Domiciled, Accumulating). 48 shares total: 46 on IBKR + 2 added on Tiger UK on Nov 27, 2026 @ $180.01."
       },
 
       // --- TIGER BROKERS (TigerTrade - 50280676) ---
@@ -366,28 +371,6 @@ class PortfolioManager {
         unrealizedPnl: -14.64,
         realizedPnl: 0.00,
         notes: "Tactical trading instrument."
-      },
-      // --- TIGER BROKERS UK ETF (LSE TRWBUKETF) - Added Nov 27, 2026 ---
-      {
-        id: "tiger-vwra",
-        symbol: "VWRA",
-        rawSymbol: "VWRA",
-        name: "Vanguard FTSE All-World UCITS ETF (Tiger UK)",
-        broker: "Tiger",
-        shares: 2,
-        avgCost: 180.01,
-        currentPrice: 180.01,
-        change: 0.00,
-        pctChange: 0.00,
-        currency: "USD",
-        market: "US", // Grouped in Global USD ETFs
-        assetClass: "Equity Index ETF",
-        totalPnl: 0.00,
-        unrealizedPnl: 0.00,
-        realizedPnl: 0.00,
-        commission: 1.89,
-        tradeDate: "2026-11-27 22:58:11",
-        notes: "Bought 2 shares @ $180.0106 on Nov 27, 2026 ($360.02 USD, Comm $1.89 USD). Tiger UK ETF (TRWBUKETF)."
       }
     ];
 
@@ -831,7 +814,7 @@ class PortfolioManager {
       };
     }
 
-    // 3. SPECIFIC RULE: CORE ALL-WORLD BACKBONE (VWRA on IBKR)
+    // 3. SPECIFIC RULE: CORE ALL-WORLD BACKBONE (VWRA on IBKR & Tiger)
     if (pos.symbol === "VWRA") {
       return {
         action: "ACCUMULATE ON DIP (DCA)",
@@ -840,7 +823,7 @@ class PortfolioManager {
         riskClass: "cyan",
         invalidation: "USD 162.00",
         target: "USD 210.00",
-        rationale: `VWRA holds over 3,600 companies across 47 nations and forms the bedrock of your long-term wealth. Current -8.9% drawdown is a normal market fluctuation. Continue disciplined periodic dollar-cost averaging into IBKR; do not panic sell.`
+        rationale: `VWRA holds over 3,600 companies across 47 nations and forms the bedrock of your long-term wealth. You hold 48 shares total across IBKR & Tiger at an improved average price of $190.64 USD. Continue disciplined periodic dollar-cost averaging; do not panic sell.`
       };
     }
 
@@ -1124,7 +1107,7 @@ class PortfolioManager {
       totalHoldingsCostSGD += posCostSGD;
       totalDayPnlSGD += dayPnlSGD;
 
-      if (pos.broker === "IBKR") ibkrPositionsCount++;
+      if (pos.broker.includes("IBKR")) ibkrPositionsCount++;
       else if (pos.broker === "Tiger") tigerPositionsCount++;
     });
 
@@ -1272,7 +1255,7 @@ class PortfolioManager {
       const weightPct = totalAssetsSGD > 0 ? (posValSGD / totalAssetsSGD) * 100 : 0;
 
       const verdict = this.generateTraderVerdict(pos, totalPortfolioUSD);
-      const isIbkr = pos.broker === "IBKR";
+      const isIbkr = pos.broker.includes("IBKR");
 
       const currSymbol = pos.currency === "SGD" ? "S$" : pos.currency === "HKD" ? "HK$" : "$";
       const isCharted = this.app && this.app.selectedSymbol === pos.symbol;
@@ -1804,12 +1787,12 @@ class PortfolioManager {
         name: "Vanguard FTSE All-World UCITS ETF (LSE / Tiger UK)",
         broker: "IBKR (46) + Tiger (2)",
         shares: "48 Shares Total",
-        weight: ((this.toUSD(180.01 * 48, "USD") / totalValUSD) * 100).toFixed(1) + "%",
+        weight: ((this.toUSD(174.00 * 48, "USD") / totalValUSD) * 100).toFixed(1) + "%",
         category: "accumulate",
         urgency: "CORE BUY",
         urgencyClass: "bull-bg",
         action: "✓ DCA EXECUTED (+2 SHARES ON NOV 27) // CONTINUE MONTHLY DISCIPLINE",
-        macroTrigger: `Holds 3,600+ companies across 47 nations. Latest trade confirmed on Tiger UK (Nov 27, 2026): Bought 2 shares @ $180.01 ($360.02 USD). Total holding is now 48 shares (46 on IBKR + 2 on Tiger). Continue periodic dollar-cost averaging to compound global long-term wealth.`,
+        macroTrigger: `Holds 3,600+ companies across 47 nations. Latest trade confirmed on Tiger UK (Nov 27, 2026): Bought 2 shares @ $180.01 ($360.02 USD). Total holding is now 48 shares (46 on IBKR + 2 on Tiger) with a new weighted average cost of $190.64. Continue periodic dollar-cost averaging to compound global long-term wealth.`,
         entryTrigger: "USD 170.00 – 180.00",
         stopLoss: "USD 162.00 (Long-Term Floor)",
         target: "USD 210.00 (24-Mo Objective)",
@@ -2073,7 +2056,7 @@ class PortfolioManager {
           </div>
           <div class="macro-diag-item">
             <span class="diag-label">CORE ALLOCATION:</span>
-            <strong class="cyan">DCA INTO VWRA (IBKR) ON DIP</strong>
+            <strong class="cyan">DCA INTO VWRA (IBKR & TIGER)</strong>
           </div>
           <div class="macro-diag-item">
             <span class="diag-label">GEOPOLITICAL HEDGE:</span>

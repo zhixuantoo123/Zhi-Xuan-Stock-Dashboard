@@ -497,7 +497,7 @@ class TradingApp {
         { symbol: "NVDA", name: "NVIDIA Corporation", market: "NASDAQ", price: "$138.25" },
         { symbol: "AMZN", name: "Amazon.com Inc.", market: "NASDAQ", price: "$210.15" },
         { symbol: "TSLA", name: "Tesla Inc.", market: "NASDAQ", price: "$238.80" },
-        { symbol: "VWRA.L", name: "Vanguard FTSE All-World (IBKR)", market: "LSE", price: "$142.50" },
+        { symbol: "VWRA.L", name: "Vanguard FTSE All-World (IBKR & Tiger)", market: "LSE", price: "$174.00" },
         { symbol: "03067.HK", name: "ISHARESHSTECH", market: "HKEX", price: "HK$7.68" },
         { symbol: "01398.HK", name: "ICBC", market: "HKEX", price: "HK$7.61" }
       ];
