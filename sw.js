@@ -1,27 +1,7 @@
 // Service Worker for World Monitor & Trading Terminal
-const CACHE_NAME = 'worldmonitor-v1.2';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/app.js',
-  '/chart.js',
-  '/portfolio.js',
-  '/scanner.js',
-  '/ai-analyst.js',
-  '/news.js',
-  '/calendar.js',
-  '/livestream.js',
-  '/manifest.json',
-  '/icon.svg'
-];
+const CACHE_NAME = 'worldmonitor-v2.3';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((err) => console.warn('Cache prefill warning:', err));
-    })
-  );
   self.skipWaiting();
 });
 
@@ -29,26 +9,26 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.map((key) => caches.delete(key))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Let external live streams and API endpoints pass through to network
+  // Let streaming & external APIs pass directly
   if (event.request.url.includes('youtube.com') || 
       event.request.url.includes('binance.com') || 
       event.request.url.includes('yahoo.com') ||
-      event.request.url.includes('generativelanguage.googleapis.com')) {
+      event.request.url.includes('generativelanguage.googleapis.com') ||
+      event.request.url.includes('anthropic.com')) {
     return;
   }
 
+  // Network-First Strategy: Always fetch latest deployed code from Vercel; fallback to cache only if offline
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      // Return cached version or fetch from network (stale-while-revalidate)
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
+    fetch(event.request)
+      .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -56,9 +36,7 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      }).catch(() => cached);
-
-      return cached || fetchPromise;
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
 });

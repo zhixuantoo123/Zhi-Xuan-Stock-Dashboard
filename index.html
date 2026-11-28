@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="WorldMonitor">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2.3">
   <!-- Local Lightweight Charts Library (Pre-downloaded for zero-latency, 100% offline reliability) -->
   <script src="lightweight-charts.standalone.js"></script>
   <script>
@@ -1142,19 +1142,21 @@
     </div>
   </div>
 
-  <!-- APPLICATION SCRIPTS -->
-  <script src="chart.js"></script>
-  <script src="scanner.js"></script>
-  <script src="ai-analyst.js"></script>
-  <script src="portfolio.js"></script>
-  <script src="news.js"></script>
-  <script src="calendar.js"></script>
-  <script src="livestream.js"></script>
-  <script src="app.js"></script>
+  <!-- APPLICATION SCRIPTS (Versioned to bypass stale browser & SW caches) -->
+  <script src="chart.js?v=2.3"></script>
+  <script src="scanner.js?v=2.3"></script>
+  <script src="ai-analyst.js?v=2.3"></script>
+  <script src="portfolio.js?v=2.3"></script>
+  <script src="news.js?v=2.3"></script>
+  <script src="calendar.js?v=2.3"></script>
+  <script src="livestream.js?v=2.3"></script>
+  <script src="app.js?v=2.3"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
+        navigator.serviceWorker.register('sw.js?v=2.3').then(reg => {
+          reg.update();
+        }).catch(() => {});
       });
     }
   </script>

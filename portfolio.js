@@ -42,6 +42,15 @@ class PortfolioManager {
     this.currentPnlSubtab = "securities"; // "securities" | "funds"
 
     this.holdings = this.loadHoldings();
+    // Guaranteed enforcement of 48 shares and $190.64 average cost for VWRA across any client session
+    if (this.holdings) {
+      const vwra = this.holdings.find(h => h.symbol === "VWRA" || h.id === "ibkr-vwra");
+      if (vwra) {
+        vwra.shares = 48;
+        vwra.avgCost = 190.64;
+        vwra.broker = "IBKR & Tiger";
+      }
+    }
     this.cashBalances = {
       tigerUSD: 181.29,
       tigerSGD: 172.00,
@@ -472,6 +481,15 @@ class PortfolioManager {
         if (confirm("Reset holdings to the verified statement snapshot?")) {
           localStorage.removeItem(this.storageKey);
           this.holdings = this.loadHoldings();
+    // Guaranteed enforcement of 48 shares and $190.64 average cost for VWRA across any client session
+    if (this.holdings) {
+      const vwra = this.holdings.find(h => h.symbol === "VWRA" || h.id === "ibkr-vwra");
+      if (vwra) {
+        vwra.shares = 48;
+        vwra.avgCost = 190.64;
+        vwra.broker = "IBKR & Tiger";
+      }
+    }
           this.render();
           this.app.showToast("Holdings reloaded from statements", "bull");
         }
