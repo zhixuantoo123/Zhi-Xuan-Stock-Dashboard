@@ -278,23 +278,53 @@ class TradingApp {
 
     // Settings Modal
     const settingsBtn = document.getElementById("btn-open-settings");
+    const openLlmBtn = document.getElementById("btn-open-llm-settings");
     const settingsModal = document.getElementById("settings-modal");
     const closeSettings = document.getElementById("close-settings");
     const saveSettings = document.getElementById("btn-save-settings");
-    const apiKeyInput = document.getElementById("input-gemini-key");
+    const providerSelect = document.getElementById("select-ai-provider");
+    const geminiKeyInput = document.getElementById("input-gemini-key");
+    const claudeKeyInput = document.getElementById("input-claude-key");
+    const rowGemini = document.getElementById("row-gemini-key");
+    const rowClaude = document.getElementById("row-claude-key");
 
-    if (settingsBtn && settingsModal) {
-      settingsBtn.addEventListener("click", () => {
-        if (apiKeyInput) apiKeyInput.value = this.aiAnalyst.geminiApiKey;
-        settingsModal.classList.add("open");
-      });
+    const updateProviderRows = () => {
+      const p = providerSelect ? providerSelect.value : "gemini";
+      if (rowGemini) rowGemini.style.display = p === "gemini" ? "block" : "none";
+      if (rowClaude) rowClaude.style.display = p === "claude" ? "block" : "none";
+    };
+
+    if (providerSelect) {
+      providerSelect.addEventListener("change", updateProviderRows);
+    }
+
+    const openSettingsWithLLM = () => {
+      if (this.aiAnalyst) {
+        if (providerSelect) providerSelect.value = this.aiAnalyst.llmProvider || "gemini";
+        if (geminiKeyInput) geminiKeyInput.value = this.aiAnalyst.geminiApiKey || "";
+        if (claudeKeyInput) claudeKeyInput.value = this.aiAnalyst.claudeApiKey || "";
+      }
+      updateProviderRows();
+      if (settingsModal) settingsModal.classList.add("open");
+    };
+
+    if (settingsBtn) settingsBtn.addEventListener("click", openSettingsWithLLM);
+    if (openLlmBtn) openLlmBtn.addEventListener("click", openSettingsWithLLM);
+
+    if (settingsModal) {
       if (closeSettings) {
         closeSettings.addEventListener("click", () => settingsModal.classList.remove("open"));
       }
       if (saveSettings) {
         saveSettings.addEventListener("click", () => {
-          if (apiKeyInput) this.aiAnalyst.setApiKey(apiKeyInput.value);
-          this.showToast("Settings saved successfully", "bull");
+          const provider = providerSelect ? providerSelect.value : "gemini";
+          const gemKey = geminiKeyInput ? geminiKeyInput.value.trim() : "";
+          const claudeKey = claudeKeyInput ? claudeKeyInput.value.trim() : "";
+
+          if (this.aiAnalyst) {
+            this.aiAnalyst.setLLMConfig(provider, gemKey, claudeKey);
+          }
+          this.showToast(`AI Settings saved: ${provider === 'claude' ? 'Claude 3.5' : provider === 'gemini' ? 'Gemini 1.5' : 'Quantitative'} active`, "bull");
           settingsModal.classList.remove("open");
         });
       }

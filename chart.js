@@ -50,8 +50,8 @@ class TradingChartManager {
     this.container.innerHTML = "";
 
     this.chart = LightweightCharts.createChart(this.container, {
-      width: this.container.clientWidth || 800,
-      height: this.container.clientHeight || 450,
+      width: Math.max(this.container.clientWidth || 0, 320),
+      height: Math.max(this.container.clientHeight || 0, 260),
       layout: {
         background: { type: 'solid', color: '#080B10' },
         textColor: '#94A3B8',
@@ -181,7 +181,15 @@ class TradingChartManager {
     this.currentData = data;
     this.currentSymbol = symbol;
 
-    if (this.chart && this.container && this.container.clientWidth > 0 && this.container.clientHeight > 0) {
+    if (!this.chart) {
+      this.initChart();
+    }
+    if (!this.chart) {
+      console.warn("Chart instance not available to render data");
+      return;
+    }
+
+    if (this.container && this.container.clientWidth > 0 && this.container.clientHeight > 0) {
       this.chart.applyOptions({
         width: this.container.clientWidth,
         height: this.container.clientHeight

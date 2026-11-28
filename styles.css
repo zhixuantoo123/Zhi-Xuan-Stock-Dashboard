@@ -1024,6 +1024,37 @@ html, body {
   border-radius: 3px;
   text-transform: uppercase;
 }
+.ai-llm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(168, 85, 247, 0.18);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  color: #FFF;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.ai-llm-pill:hover {
+  background: rgba(168, 85, 247, 0.35);
+  border-color: #A855F7;
+  transform: translateY(-1px);
+}
+.ai-llm-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-bull);
+  box-shadow: 0 0 6px var(--color-bull);
+  display: inline-block;
+}
+.ai-llm-dot.offline {
+  background: var(--color-cyan);
+  box-shadow: 0 0 6px var(--color-cyan);
+}
 
 /* Sentiment / Fear & Greed Meter */
 .sentiment-card {

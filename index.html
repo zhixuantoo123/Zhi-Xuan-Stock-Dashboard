@@ -14,6 +14,11 @@
   <link rel="stylesheet" href="styles.css">
   <!-- Local Lightweight Charts Library (Pre-downloaded for zero-latency, 100% offline reliability) -->
   <script src="lightweight-charts.standalone.js"></script>
+  <script>
+    if (typeof LightweightCharts === 'undefined') {
+      document.write('<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"><\\/script>');
+    }
+  </script>
 </head>
 <body>
 
@@ -344,7 +349,13 @@
               </svg>
               <span>AI Market Synthesis</span>
             </div>
-            <span class="ai-chip">REAL-TIME ENGINE</span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button type="button" class="ai-llm-pill" id="btn-open-llm-settings" title="Connect Frontier AI Model (Gemini / Claude)">
+                <span class="ai-llm-dot" id="ai-llm-indicator"></span>
+                <span id="ai-llm-label">Gemini / Claude</span>
+              </button>
+              <span class="ai-chip">REAL-TIME ENGINE</span>
+            </div>
           </div>
 
           <!-- Market Sentiment / Fear & Greed Meter -->
@@ -531,7 +542,7 @@
               <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Net Liquidation Value</span>
               <div style="display: flex; gap: 6px; align-items: center;">
                 <span class="badge-ibkr" id="port-ibkr-count">1 IBKR (VWRA)</span>
-                <span class="badge-tiger" id="port-tiger-count">15 Tiger Positions</span>
+                <span class="badge-tiger" id="port-tiger-count">16 Tiger Positions</span>
               </div>
             </div>
             <div class="mono" style="font-size: 22px; font-weight: 800; color: var(--text-bright); margin-top: 2px;" id="port-total-value">
@@ -877,10 +888,33 @@
 
       <div style="display: flex; flex-direction: column; gap: 14px;">
         <div class="form-row">
-          <label class="form-label">Google Gemini API Key (Optional for Custom AI Queries)</label>
+          <label class="form-label">Frontier AI Copilot Engine</label>
+          <select class="form-select" id="select-ai-provider">
+            <option value="gemini" selected>Google Gemini (1.5 Flash / 2.0 - Free Tier)</option>
+            <option value="claude">Anthropic Claude (3.5 Sonnet - Frontier Reasoning)</option>
+            <option value="offline">Built-in Quantitative AI (100% Offline & Factual)</option>
+          </select>
+        </div>
+
+        <div class="form-row" id="row-gemini-key">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <label class="form-label">Google Gemini API Key</label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="font-size: 10px; color: var(--color-cyan); text-decoration: underline;">Get Free Key ↗</a>
+          </div>
           <input type="password" class="form-input" id="input-gemini-key" placeholder="AIzaSy...">
           <span style="font-size: 10px; color: var(--text-muted);">
-            If left blank, the dashboard uses its built-in quantitative analytical engine which works instantly with zero setup.
+            Powers live market synthesis, institutional macro analysis, and portfolio directives via Google DeepMind models.
+          </span>
+        </div>
+
+        <div class="form-row" id="row-claude-key" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <label class="form-label">Anthropic Claude API Key</label>
+            <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" style="font-size: 10px; color: #A855F7; text-decoration: underline;">Get Claude Key ↗</a>
+          </div>
+          <input type="password" class="form-input" id="input-claude-key" placeholder="sk-ant-api03-...">
+          <span style="font-size: 10px; color: var(--text-muted);">
+            World-leading economic & quantitative reasoning from Anthropic's Claude 3.5 Sonnet.
           </span>
         </div>
 

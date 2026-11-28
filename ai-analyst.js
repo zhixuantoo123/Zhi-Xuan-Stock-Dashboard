@@ -2,13 +2,46 @@
 class AIMarketAnalyst {
   constructor(app) {
     this.app = app;
+    this.llmProvider = localStorage.getItem("ai_llm_provider") || "gemini";
     this.geminiApiKey = localStorage.getItem("gemini_api_key") || "";
+    this.claudeApiKey = localStorage.getItem("claude_api_key") || "";
     this.initInteractiveUI();
+    this.updateLLMUI();
+  }
+
+  setLLMConfig(provider, geminiKey, claudeKey) {
+    this.llmProvider = provider || "gemini";
+    this.geminiApiKey = (geminiKey || "").trim();
+    this.claudeApiKey = (claudeKey || "").trim();
+
+    localStorage.setItem("ai_llm_provider", this.llmProvider);
+    localStorage.setItem("gemini_api_key", this.geminiApiKey);
+    localStorage.setItem("claude_api_key", this.claudeApiKey);
+
+    this.updateLLMUI();
   }
 
   setApiKey(key) {
     this.geminiApiKey = key.trim();
     localStorage.setItem("gemini_api_key", this.geminiApiKey);
+    this.updateLLMUI();
+  }
+
+  updateLLMUI() {
+    const label = document.getElementById("ai-llm-label");
+    const dot = document.getElementById("ai-llm-indicator");
+    if (!label) return;
+
+    if (this.llmProvider === "claude" && this.claudeApiKey) {
+      label.textContent = "Claude 3.5 Active";
+      if (dot) { dot.className = "ai-llm-dot"; dot.style.background = "#A855F7"; dot.style.boxShadow = "0 0 6px #A855F7"; }
+    } else if (this.llmProvider === "gemini" && this.geminiApiKey) {
+      label.textContent = "Gemini 1.5 Active";
+      if (dot) { dot.className = "ai-llm-dot"; dot.style.background = "var(--color-bull)"; dot.style.boxShadow = "0 0 6px var(--color-bull)"; }
+    } else {
+      label.textContent = "Quantitative Brain";
+      if (dot) { dot.className = "ai-llm-dot offline"; dot.style.background = "var(--color-cyan)"; dot.style.boxShadow = "0 0 6px var(--color-cyan)"; }
+    }
   }
 
   initInteractiveUI() {
@@ -341,6 +374,31 @@ class AIMarketAnalyst {
     }
   }
 
+  buildPortfolioContext() {
+    const p = this.app.portfolio;
+    const summaryTotal = document.getElementById("summary-total-assets")?.textContent || "S$47,500+ SGD";
+    let holdingsText = "17 Audited Positions (1 IBKR, 16 Tiger Brokers)";
+
+    if (p && p.holdings) {
+      holdingsText = p.holdings.map(h => 
+        `• ${h.symbol} (${h.name}, ${h.broker}): ${h.shares} shares @ avg cost ${h.currency} ${h.avgCost}, curr ${h.currency} ${h.currentPrice}`
+      ).join("\n");
+    }
+
+    return `
+AUDITED USER PORTFOLIO CONTEXT:
+- Net Liquidation Value: ${summaryTotal}
+- Total Positions: 17 Holdings (1 IBKR, 16 Tiger Brokers)
+- Core Global Wealth Anchor: VWRA (48 Shares total: 46 on IBKR + 2 recently added on Tiger Brokers TRWBUKETF at $180.01 on Nov 27)
+- Singapore Blue-Chip Dividend Sleeve: DBS (200 sh, +S$3,440 gain), OCBC (200 sh, +S$2,798 gain), ES3 (300 sh), Kimly (2500 sh)
+- US Mega-Cap Growth Sleeve: AAPL, GOOGL, MSFT, NVDA, AMZN (~40.2% total weight)
+- Hedges: GLDM (Gold), SHLD (Defense Tech), BITO (Bitcoin Strategy)
+- Portfolio Metrics: Beta 1.08, Sharpe Ratio 1.64, Annual Recurring Dividends ~S$763.50/yr
+- Tax Advantages: VWRA is Irish-domiciled (15% US dividend withholding vs 30% US standard), 0% capital gains tax in Singapore
+- Live Macro: Fed Funds 4.50-4.75%, MAS SORA ~3.1%, VIX 26.80 (Rule of 16 daily range ±1.68%)
+`;
+  }
+
   async handleUserQuery() {
     const input = document.getElementById("ai-ask-input");
     const chatLog = document.getElementById("ai-chat-output");
@@ -360,32 +418,83 @@ class AIMarketAnalyst {
     // Append loading placeholder
     const aiMsg = document.createElement("div");
     aiMsg.style.cssText = "background: var(--bg-card); border-left: 3px solid var(--color-purple); padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;";
-    aiMsg.innerHTML = `<span class="purple" style="font-weight: 700;">AI Analyst:</span> Calculating quantitative parameters...`;
+    
+    const activeProviderName = this.llmProvider === "claude" ? "Claude 3.5 Sonnet" : this.llmProvider === "gemini" ? "Gemini 1.5 Flash" : "Quantitative Engine";
+    aiMsg.innerHTML = `<span class="purple" style="font-weight: 700;">${activeProviderName}:</span> Consulting portfolio telemetry & calculating factual advice...`;
     chatLog.appendChild(aiMsg);
     chatLog.scrollTop = chatLog.scrollHeight;
 
-    // Check if Gemini API key exists
-    if (this.geminiApiKey) {
+    const portfolioContext = this.buildPortfolioContext();
+    const systemInstruction = "You are Zhi Xuan's senior quantitative portfolio manager and risk officer. Provide strictly factual, genuine, objective, and mathematically grounded financial advice (under 140 words). Use exact numbers from the provided audited portfolio context (e.g. 48 shares of VWRA across IBKR & Tiger, DBS, OCBC, CET1 ratios >14.5%, 15% Irish UCITS withholding). Never use speculative hype or emotional bias.";
+
+    // 1. Anthropic Claude 3.5 Sonnet API
+    if (this.llmProvider === "claude" && this.claudeApiKey) {
       try {
-        const prompt = `You are a CFA charterholder and quantitative macro risk officer. You MUST provide strictly factual, mathematically grounded, and zero-bias answers (under 120 words). Cite exact financial metrics (P/E, balance sheet cash, CET1 ratios, RSI, moving averages, dividend yields) and avoid speculative hype or emotional bias. Answer this query regarding global markets, audited portfolio, and asset ${this.app.selectedSymbol}:\n"${query}"`;
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "x-api-key": this.claudeApiKey,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+            "dangerously-allow-browser": "true"
+          },
+          body: JSON.stringify({
+            model: "claude-3-5-sonnet-20241022",
+            max_tokens: 350,
+            system: `${systemInstruction}\n\n${portfolioContext}`,
+            messages: [
+              { role: "user", content: `Question regarding asset ${this.app.selectedSymbol || 'portfolio'}:\n"${query}"` }
+            ]
+          })
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.content && json.content[0] && json.content[0].text) {
+            aiMsg.innerHTML = `<span style="color: #A855F7; font-weight: 700;">Claude 3.5 Sonnet:</span> ${json.content[0].text.replace(/\n/g, '<br>')}`;
+            chatLog.scrollTop = chatLog.scrollHeight;
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Claude API call failed, falling back to local factual quantitative engine", e);
+      }
+    }
+
+    // 2. Google Gemini 1.5 / 2.0 API
+    if ((this.llmProvider === "gemini" || !this.claudeApiKey) && this.geminiApiKey) {
+      try {
+        const fullPrompt = `${systemInstruction}\n\n${portfolioContext}\n\nTrader Question regarding ${this.app.selectedSymbol || 'portfolio'}:\n"${query}"`;
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          body: JSON.stringify({ contents: [{ parts: [{ text: fullPrompt }] }] })
         });
-        const json = await res.json();
-        const text = json.candidates[0].content.parts[0].text;
-        aiMsg.innerHTML = `<span class="purple" style="font-weight: 700;">Gemini Quantitative AI:</span> ${text.replace(/\n/g, '<br>')}`;
-        return;
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.candidates && json.candidates[0] && json.candidates[0].content) {
+            const text = json.candidates[0].content.parts[0].text;
+            aiMsg.innerHTML = `<span class="purple" style="font-weight: 700;">Gemini 1.5 Flash:</span> ${text.replace(/\n/g, '<br>')}`;
+            chatLog.scrollTop = chatLog.scrollHeight;
+            return;
+          }
+        }
       } catch (e) {
         console.warn("Gemini API call failed, falling back to local factual quantitative engine", e);
       }
     }
 
-    // High-precision algorithmic AI response fallback (Zero Bias, Factual Proof Points)
+    // 3. High-precision Algorithmic AI Response Fallback (Zero Bias, Factual Proof Points)
     setTimeout(() => {
       const resp = this.generateAnalyticalAnswer(query, this.app.selectedItem);
-      aiMsg.innerHTML = `<span class="purple" style="font-weight: 700;">Quantitative Engine (Zero Bias):</span> ${resp}`;
+      const isLlmConnected = (this.llmProvider === "claude" && this.claudeApiKey) || (this.llmProvider === "gemini" && this.geminiApiKey);
+      const tipFooter = isLlmConnected ? "" : `
+        <div style="margin-top: 6px; font-size: 10px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+          💡 Generated by Built-in Quantitative Brain. To enable live <strong>Claude 3.5 Sonnet</strong> or <strong>Gemini 1.5 Flash</strong> reasoning, click <span style="color: #A855F7; cursor: pointer; text-decoration: underline;" onclick="document.getElementById('btn-open-llm-settings').click()">Connect LLM</span>.
+        </div>
+      `;
+      aiMsg.innerHTML = `<span class="purple" style="font-weight: 700;">Quantitative Engine (Zero Bias):</span> ${resp}${tipFooter}`;
       chatLog.scrollTop = chatLog.scrollHeight;
     }, 350);
   }
@@ -397,15 +506,24 @@ class AIMarketAnalyst {
     const price = item ? `$${item.price.toLocaleString()}` : "the current price";
     const change = item ? `${item.pctChange >= 0 ? '+' : ''}${item.pctChange}%` : "0%";
 
-    // 1. DBS / OCBC / Singapore Bank Dividend Safety
-    if (q.includes("dbs") || q.includes("dividend") || q.includes("ocbc") || q.includes("capital adequacy")) {
+    // 1. VWRA / All-World Indexing / New Purchase
+    if (q.includes("vwra") || q.includes("world") || q.includes("etf") || q.includes("all-world") || q.includes("ucits")) {
+      return `<strong>Audited VWRA Wealth Engine Status:</strong><br>
+      • <strong>Total Holding:</strong> You hold <strong>48 Shares Total</strong> across two brokerages: <strong>46 shares on IBKR</strong> plus <strong>2 shares on Tiger Brokers (TRWBUKETF)</strong>.<br>
+      • <strong>Latest Trade (Nov 27, 2026):</strong> Bought 2 shares @ $180.0106 ($360.02 USD total, Comm $1.89 USD) in Tiger Trade.<br>
+      • <strong>Tax Advantage:</strong> VWRA is Irish-domiciled, capping US dividend withholding tax at <strong>15%</strong> (vs 30% US standard) with 0% capital gains tax in Singapore.<br>
+      • <strong>Directive:</strong> Holds 3,600+ companies across 47 nations. Continue disciplined monthly dollar-cost averaging into your global core.`;
+    }
+
+    // 2. DBS / OCBC / Singapore Bank Dividend Safety
+    else if (q.includes("dbs") || q.includes("dividend") || q.includes("ocbc") || q.includes("capital adequacy")) {
       return `<strong>Factual Capital Adequacy & Dividend Analysis:</strong><br>
       • <strong>D05 (DBS Group):</strong> Audited CET1 ratio stands at <strong>14.7%</strong>, well above MAS statutory requirement of 6.5%. Provides a robust S$2.16/share annualized dividend (~5.2% yield). Total position gain: <strong>+S$3,440.52 SGD (+33.1%)</strong>.<br>
       • <strong>O39 (OCBC Bank):</strong> CET1 ratio stands at <strong>15.6%</strong> with dividend payout ratio anchored at 50%. Annual yield ~5.8%. Total position gain: <strong>+S$2,798.56 SGD (+23.9%)</strong>.<br>
       • <strong>Tax Efficiency:</strong> 0% dividend withholding tax in Singapore delivers 100% net cash flow into the portfolio.`;
     }
 
-    // 2. US Tech Exposure & Portfolio Concentration Risk
+    // 3. US Tech Exposure & Portfolio Concentration Risk
     else if (q.includes("tech") || q.includes("exposure") || q.includes("concentration") || q.includes("risk")) {
       return `<strong>Audited US Tech Concentration Breakdown:</strong><br>
       • <strong>Holdings (5 assets):</strong> AAPL, MSFT, GOOGL, NVDA, AMZN aggregate to <strong>~S$18,900 SGD (~40.2% of total audited portfolio)</strong>.<br>
@@ -413,21 +531,12 @@ class AIMarketAnalyst {
       • <strong>Downside Hedging:</strong> S$14,500 SGD in defensive Singapore blue chips (DBS, OCBC, ES3, Kimly) produces S$763.50 in annual dividends, reducing overall portfolio beta to <strong>1.08</strong> with a Sharpe Ratio of <strong>1.64</strong>.`;
     }
 
-    // 3. S&P 500 / Fibonacci / Technical Levels
+    // 4. S&P 500 / Fibonacci / Technical Levels
     else if (q.includes("fib") || q.includes("s&p") || q.includes("levels") || q.includes("rsi")) {
       return `<strong>Quantitative Technical Telemetry for ^GSPC / ${sym}:</strong><br>
       • <strong>RSI (14D):</strong> 58.20 (within healthy expansion corridor; overbought boundary at 70.00).<br>
       • <strong>Fibonacci Retracements:</strong> Golden Ratio 61.8% support cluster sits at <strong>$5,780.20</strong>; 38.2% intermediate retracement at <strong>$5,910.40</strong>.<br>
       • <strong>50-Day Moving Average:</strong> Price trades <strong>+3.12% above</strong> the 50-day EMA base, verifying institutional trend support. Invalidation occurs only on daily close below the 20-day EMA.`;
-    }
-
-    // 4. VWRA Tax Efficiency & Structural Indexing
-    else if (q.includes("vwra") || q.includes("tax") || q.includes("etf") || q.includes("ireland") || q.includes("ucits")) {
-      return `<strong>Institutional UCITS Tax Efficiency: VWRA (Vanguard FTSE All-World):</strong><br>
-      • <strong>US Dividend Withholding Tax:</strong> VWRA is domiciled in Ireland, reducing US dividend withholding tax from <strong>30% down to 15%</strong> under the US-Ireland bilateral tax treaty.<br>
-      • <strong>Singapore Capital Gains:</strong> 0% capital gains tax on SG-based investors.<br>
-      • <strong>Accumulating Structure:</strong> Dividends are automatically reinvested at Net Asset Value without broker transaction friction or foreign currency conversion fees.<br>
-      • <strong>Diversification:</strong> Tracks 3,600+ large and mid-cap stocks across 47 developed and emerging markets.`;
     }
 
     // 5. Macro Policy / Federal Reserve / Interest Rates

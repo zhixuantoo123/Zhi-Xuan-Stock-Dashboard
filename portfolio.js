@@ -366,6 +366,28 @@ class PortfolioManager {
         unrealizedPnl: -14.64,
         realizedPnl: 0.00,
         notes: "Tactical trading instrument."
+      },
+      // --- TIGER BROKERS UK ETF (LSE TRWBUKETF) - Added Nov 27, 2026 ---
+      {
+        id: "tiger-vwra",
+        symbol: "VWRA",
+        rawSymbol: "VWRA",
+        name: "Vanguard FTSE All-World UCITS ETF (Tiger UK)",
+        broker: "Tiger",
+        shares: 2,
+        avgCost: 180.01,
+        currentPrice: 180.01,
+        change: 0.00,
+        pctChange: 0.00,
+        currency: "USD",
+        market: "US", // Grouped in Global USD ETFs
+        assetClass: "Equity Index ETF",
+        totalPnl: 0.00,
+        unrealizedPnl: 0.00,
+        realizedPnl: 0.00,
+        commission: 1.89,
+        tradeDate: "2026-11-27 22:58:11",
+        notes: "Bought 2 shares @ $180.0106 on Nov 27, 2026 ($360.02 USD, Comm $1.89 USD). Tiger UK ETF (TRWBUKETF)."
       }
     ];
 
@@ -1493,7 +1515,7 @@ class PortfolioManager {
         secMap["Financials & Banking"] += valSGD;
       } else if (["AAPL", "GOOGL", "MSFT", "NVDA", "AMZN", "TSLA", "03067.HK"].includes(pos.symbol)) {
         secMap["Mega-Cap Tech & AI"] += valSGD;
-      } else if (["VWRA.L", "ES3.SI", "SPY", "QQQ", "TQQQ"].includes(pos.symbol)) {
+      } else if (["VWRA", "VWRA.L", "ES3.SI", "SPY", "QQQ", "TQQQ"].includes(pos.symbol) || pos.symbol.startsWith("VWRA")) {
         secMap["Broad Index ETFs"] += valSGD;
       } else {
         secMap["Consumer & Others"] += valSGD;
@@ -1779,16 +1801,16 @@ class PortfolioManager {
       },
       {
         symbol: "VWRA",
-        name: "Vanguard FTSE All-World UCITS ETF (LSE)",
-        broker: "IBKR",
-        shares: "46 Shares",
-        weight: ((this.toUSD(174.00 * 46, "USD") / totalValUSD) * 100).toFixed(1) + "%",
+        name: "Vanguard FTSE All-World UCITS ETF (LSE / Tiger UK)",
+        broker: "IBKR (46) + Tiger (2)",
+        shares: "48 Shares Total",
+        weight: ((this.toUSD(180.01 * 48, "USD") / totalValUSD) * 100).toFixed(1) + "%",
         category: "accumulate",
         urgency: "CORE BUY",
         urgencyClass: "bull-bg",
-        action: "AGGRESSIVE MONTHLY DCA ACCUMULATION ($174.00)",
-        macroTrigger: `VWRA holds 3,600+ companies across 47 countries and is the premier compounding backbone of your long-term wealth. The current -8.9% drawdown is an institutional value zone. Deploy cash steadily via automated monthly dollar-cost averaging into IBKR; do not interrupt compounding during market chop.`,
-        entryTrigger: "USD 170.00 – 175.00",
+        action: "✓ DCA EXECUTED (+2 SHARES ON NOV 27) // CONTINUE MONTHLY DISCIPLINE",
+        macroTrigger: `Holds 3,600+ companies across 47 nations. Latest trade confirmed on Tiger UK (Nov 27, 2026): Bought 2 shares @ $180.01 ($360.02 USD). Total holding is now 48 shares (46 on IBKR + 2 on Tiger). Continue periodic dollar-cost averaging to compound global long-term wealth.`,
+        entryTrigger: "USD 170.00 – 180.00",
         stopLoss: "USD 162.00 (Long-Term Floor)",
         target: "USD 210.00 (24-Mo Objective)",
         riskReward: "1 : 4.5 (High Asymmetry)"
